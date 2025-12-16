@@ -2,10 +2,40 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Enigma #1">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>🎯 Gioco di Logica - Indovinello #1</title>
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="msapplication-navbutton-color" content="#0a0a0f">
+    <meta name="msapplication-TileColor" content="#0a0a0f">
+    
+    <!-- Fullscreen hints -->
+    <meta name="full-screen" content="yes">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    
+    <title>🎯 Enigma #1</title>
+    
+    <!-- PWA Manifest inline -->
+    <link rel="manifest" href="data:application/json,{
+        &quot;name&quot;: &quot;Gioco Enigma - Indovinello 1&quot;,
+        &quot;short_name&quot;: &quot;Enigma 1&quot;,
+        &quot;description&quot;: &quot;Gioco di ruolo con enigmi nel mondo reale&quot;,
+        &quot;start_url&quot;: &quot;.&quot;,
+        &quot;display&quot;: &quot;fullscreen&quot;,
+        &quot;orientation&quot;: &quot;portrait&quot;,
+        &quot;background_color&quot;: &quot;#0a0a0f&quot;,
+        &quot;theme_color&quot;: &quot;#0a0a0f&quot;,
+        &quot;icons&quot;: [{
+            &quot;src&quot;: &quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f' width='100' height='100'/><text x='50' y='60' text-anchor='middle' font-size='50'>🎯</text></svg>&quot;,
+            &quot;sizes&quot;: &quot;any&quot;,
+            &quot;type&quot;: &quot;image/svg+xml&quot;
+        }]
+    }">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -28,6 +58,126 @@
         }
         html {
             scroll-behavior: smooth;
+        }
+        
+        /* Fullscreen styles */
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Safe area per notch/barra iOS */
+        body {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+        
+        /* Fullscreen button */
+        .fullscreen-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: rgba(10, 10, 15, 0.95);
+            border: 1px solid var(--accent);
+            border-radius: 25px;
+            color: var(--accent);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            animation: pulseFullscreen 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseFullscreen {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(0, 170, 255, 0.6), 0 0 30px rgba(0, 170, 255, 0.3);
+            }
+        }
+        
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+        
+        .fullscreen-btn.hidden {
+            display: none;
+        }
+        
+        /* Install prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1002;
+            background: rgba(10, 10, 15, 0.95);
+            border: 1px solid var(--primary);
+            border-radius: 15px;
+            padding: 15px 20px;
+            max-width: 90%;
+            text-align: center;
+            display: none;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        .install-prompt.show {
+            display: block;
+        }
+        
+        .install-prompt p {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+        
+        .install-prompt .install-btn {
+            padding: 8px 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 20px;
+            color: var(--bg-dark);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .install-prompt .close-prompt {
+            padding: 8px 15px;
+            background: transparent;
+            border: 1px solid var(--text-dim);
+            border-radius: 20px;
+            color: var(--text-dim);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
         }
         
         /* Custom Scrollbar - Cyberpunk style */
@@ -1594,6 +1744,19 @@
         <div class="particle"></div>
     </div>
 
+    <!-- Pulsante Fullscreen -->
+    <button class="fullscreen-btn" id="fullscreen-btn" title="Schermo intero">
+        <span>⛶</span>
+        <span>FULLSCREEN</span>
+    </button>
+    
+    <!-- Install Prompt per PWA -->
+    <div class="install-prompt" id="install-prompt">
+        <p>📱 Aggiungi alla schermata Home per un'esperienza senza barra!</p>
+        <button class="install-btn" id="install-btn">Installa</button>
+        <button class="close-prompt" id="close-prompt">Dopo</button>
+    </div>
+
     <!-- Audio generato via Web Audio API - nessun file esterno -->
     
     <!-- Pulsante audio - solo prima pagina -->
@@ -2504,6 +2667,113 @@
             }
             document.lastTouchEnd = now;
         }, { passive: false });
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // FULLSCREEN & PWA SUPPORT
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const installPrompt = document.getElementById('install-prompt');
+        const installBtn = document.getElementById('install-btn');
+        const closePromptBtn = document.getElementById('close-prompt');
+        let deferredPrompt = null;
+        
+        // Verifica se è già in modalità standalone (PWA installata)
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                            window.navigator.standalone || 
+                            document.referrer.includes('android-app://');
+        
+        // Nascondi il pulsante fullscreen se già in standalone
+        if (isStandalone) {
+            fullscreenBtn.classList.add('hidden');
+        }
+        
+        // Fullscreen toggle
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                // Entra in fullscreen
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+                fullscreenBtn.innerHTML = '<span>✕</span><span>ESCI</span>';
+            } else {
+                // Esci da fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                fullscreenBtn.innerHTML = '<span>⛶</span><span>FULLSCREEN</span>';
+            }
+        }
+        
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Aggiorna pulsante quando cambia lo stato fullscreen
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<span>✕</span><span>ESCI</span>';
+            } else {
+                fullscreenBtn.innerHTML = '<span>⛶</span><span>FULLSCREEN</span>';
+            }
+        });
+        
+        document.addEventListener('webkitfullscreenchange', () => {
+            if (document.webkitFullscreenElement) {
+                fullscreenBtn.innerHTML = '<span>✕</span><span>ESCI</span>';
+            } else {
+                fullscreenBtn.innerHTML = '<span>⛶</span><span>FULLSCREEN</span>';
+            }
+        });
+        
+        // PWA Install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Mostra il prompt dopo 3 secondi se non è già installata
+            setTimeout(() => {
+                if (!isStandalone && deferredPrompt) {
+                    installPrompt.classList.add('show');
+                }
+            }, 3000);
+        });
+        
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installPrompt.classList.remove('show');
+                }
+                deferredPrompt = null;
+            }
+        });
+        
+        closePromptBtn.addEventListener('click', () => {
+            installPrompt.classList.remove('show');
+        });
+        
+        // Nascondi prompt su iOS (deve usare "Aggiungi a Home" manualmente)
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS && !isStandalone) {
+            // Su iOS mostra istruzioni diverse dopo 5 secondi
+            setTimeout(() => {
+                installPrompt.querySelector('p').innerHTML = '📱 Tocca <strong>Condividi</strong> → <strong>Aggiungi a Home</strong> per un\'esperienza senza barra!';
+                installPrompt.querySelector('.install-btn').style.display = 'none';
+                installPrompt.classList.add('show');
+            }, 5000);
+        }
 
         // Electric cursor trail effect
         let lastSparkTime = 0;
