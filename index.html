@@ -1,2828 +1,1085 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Enigma #1">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0a0a0f">
-    <meta name="msapplication-navbutton-color" content="#0a0a0f">
-    <meta name="msapplication-TileColor" content="#0a0a0f">
-    
-    <!-- Fullscreen hints -->
-    <meta name="full-screen" content="yes">
-    <meta name="browsermode" content="application">
-    <meta name="screen-orientation" content="portrait">
-    
+    <meta name="theme-color" content="#050508">
     <title>🎯 Enigma #1</title>
-    
-    <!-- PWA Manifest inline -->
-    <link rel="manifest" href="data:application/json,{
-        &quot;name&quot;: &quot;Gioco Enigma - Indovinello 1&quot;,
-        &quot;short_name&quot;: &quot;Enigma 1&quot;,
-        &quot;description&quot;: &quot;Gioco di ruolo con enigmi nel mondo reale&quot;,
-        &quot;start_url&quot;: &quot;.&quot;,
-        &quot;display&quot;: &quot;fullscreen&quot;,
-        &quot;orientation&quot;: &quot;portrait&quot;,
-        &quot;background_color&quot;: &quot;#0a0a0f&quot;,
-        &quot;theme_color&quot;: &quot;#0a0a0f&quot;,
-        &quot;icons&quot;: [{
-            &quot;src&quot;: &quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f' width='100' height='100'/><text x='50' y='60' text-anchor='middle' font-size='50'>🎯</text></svg>&quot;,
-            &quot;sizes&quot;: &quot;any&quot;,
-            &quot;type&quot;: &quot;image/svg+xml&quot;
-        }]
-    }">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;Enigma Game - Riddle 1&quot;,&quot;short_name&quot;:&quot;Enigma 1&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;fullscreen&quot;,&quot;orientation&quot;:&quot;portrait&quot;,&quot;background_color&quot;:&quot;#050508&quot;,&quot;theme_color&quot;:&quot;#050508&quot;}">
+    <link href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0a0a0f;
-            --bg-card: #12121a;
-            --primary: #00ff88;
-            --error-red: #ff4444;
-            --secondary: #ff00aa;
-            --accent: #00aaff;
-            --text: #e0e0e0;
-            --text-dim: #888;
-            --glow-green: 0 0 30px rgba(0, 255, 136, 0.5);
-            --glow-red: 0 0 30px rgba(255, 68, 68, 0.5);
+            --bg: #050508;
+            --bg-card: #0a0a10;
+            --surface: #0f0f18;
+            --cyan: #00ffd5;
+            --cyan-dim: rgba(0, 255, 213, 0.15);
+            --magenta: #ff2d78;
+            --magenta-dim: rgba(255, 45, 120, 0.15);
+            --violet: #8b5cf6;
+            --gold: #fbbf24;
+            --text: #c8d6e5;
+            --text-dim: #4a5568;
+            --text-bright: #f0f4f8;
+            --border: rgba(0, 255, 213, 0.08);
+            --glow-cyan: 0 0 40px rgba(0, 255, 213, 0.4);
+            --glow-magenta: 0 0 40px rgba(255, 45, 120, 0.4);
+            --radius: 16px;
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        /* Fullscreen styles */
-        html, body {
-            height: 100%;
-            overflow-x: hidden;
-        }
-        
-        /* Safe area per notch/barra iOS */
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overflow-x: hidden; scroll-behavior: smooth; }
         body {
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-        }
-        
-        /* Fullscreen button */
-        .fullscreen-btn {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 15px;
-            background: rgba(10, 10, 15, 0.95);
-            border: 1px solid var(--accent);
-            border-radius: 25px;
-            color: var(--accent);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-            animation: pulseFullscreen 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulseFullscreen {
-            0%, 100% {
-                box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 20px rgba(0, 170, 255, 0.6), 0 0 30px rgba(0, 170, 255, 0.3);
-            }
-        }
-        
-        .fullscreen-btn:active {
-            transform: scale(0.95);
-            background: var(--accent);
-            color: var(--bg-dark);
-        }
-        
-        .fullscreen-btn.hidden {
-            display: none;
-        }
-        
-        /* Install prompt */
-        .install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1002;
-            background: rgba(10, 10, 15, 0.95);
-            border: 1px solid var(--primary);
-            border-radius: 15px;
-            padding: 15px 20px;
-            max-width: 90%;
-            text-align: center;
-            display: none;
-            animation: slideUp 0.3s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-        
-        .install-prompt.show {
-            display: block;
-        }
-        
-        .install-prompt p {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.9rem;
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
             color: var(--text);
-            margin-bottom: 10px;
-        }
-        
-        .install-prompt .install-btn {
-            padding: 8px 20px;
-            background: var(--primary);
-            border: none;
-            border-radius: 20px;
-            color: var(--bg-dark);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            font-weight: 700;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        
-        .install-prompt .close-prompt {
-            padding: 8px 15px;
-            background: transparent;
-            border: 1px solid var(--text-dim);
-            border-radius: 20px;
-            color: var(--text-dim);
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-        
-        /* Custom Scrollbar - Cyberpunk style */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(10, 10, 15, 0.8);
-            border-left: 1px solid rgba(0, 255, 136, 0.1);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, var(--primary), var(--accent));
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, var(--primary), var(--secondary));
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
-        }
-        
-        /* Firefox scrollbar */
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary) rgba(10, 10, 15, 0.8);
-        }
-        body {
-            font-family: 'Rajdhani', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text);
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow-x: hidden;
+            min-height: 100vh; min-height: 100dvh;
             -webkit-font-smoothing: antialiased;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
-        /* Animated Cyberpunk Background */
-        .background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            overflow: hidden;
-            background: linear-gradient(180deg, #0a0a0f 0%, #0d0015 50%, #0a0a0f 100%);
+
+        /* === CANVAS BACKGROUND === */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
         }
-        
-        /* Neon glow orbs */
-        .background-animation::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background:
-                radial-gradient(ellipse at 20% 80%, rgba(0, 255, 136, 0.15) 0%, transparent 40%),
-                radial-gradient(ellipse at 80% 20%, rgba(255, 0, 170, 0.15) 0%, transparent 40%),
-                radial-gradient(ellipse at 60% 60%, rgba(0, 170, 255, 0.1) 0%, transparent 40%),
-                radial-gradient(ellipse at 30% 30%, rgba(255, 68, 255, 0.08) 0%, transparent 35%);
-            animation: bgFloat 15s ease-in-out infinite;
+
+        /* === NOISE GRAIN OVERLAY === */
+        .grain {
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; z-index: 1;
+            pointer-events: none; opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+            animation: grainShift 0.5s steps(1) infinite;
         }
-        
-        .background-animation::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background:
-                radial-gradient(ellipse at 70% 70%, rgba(0, 255, 200, 0.12) 0%, transparent 35%),
-                radial-gradient(ellipse at 10% 40%, rgba(255, 0, 100, 0.1) 0%, transparent 40%);
-            animation: bgFloat2 20s ease-in-out infinite reverse;
+        @keyframes grainShift {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-5%, 5%); }
+            50% { transform: translate(5%, -5%); }
+            75% { transform: translate(-5%, -5%); }
+            100% { transform: translate(5%, 5%); }
         }
-        
-        @keyframes bgFloat {
-            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            25% { transform: translate(3%, 3%) rotate(2deg) scale(1.02); }
-            50% { transform: translate(-2%, 2%) rotate(-1deg) scale(0.98); }
-            75% { transform: translate(-3%, -2%) rotate(1deg) scale(1.01); }
-        }
-        
-        @keyframes bgFloat2 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(-4%, 2%) rotate(-2deg); }
-            66% { transform: translate(3%, -3%) rotate(2deg); }
-        }
-        
-        /* Cyberpunk grid floor */
-        .grid-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background-image:
-                linear-gradient(rgba(0, 255, 136, 0.07) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 136, 0.07) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: gridMove 8s linear infinite;
-            mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.8) 100%);
-            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.8) 100%);
-        }
-        
-        @keyframes gridMove {
-            0% { transform: perspective(400px) rotateX(65deg) translateY(0); }
-            100% { transform: perspective(400px) rotateX(65deg) translateY(60px); }
-        }
-        
-        /* Horizontal scan lines */
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0, 0, 0, 0.15) 2px,
-                rgba(0, 0, 0, 0.15) 4px
-            );
+
+        /* === VIGNETTE === */
+        .vignette {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
             pointer-events: none;
-            animation: scanlineFlicker 0.1s infinite;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
         }
-        
-        @keyframes scanlineFlicker {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.98; }
+
+        /* === SCAN LINE (subtle) === */
+        .scanline {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+            pointer-events: none; opacity: 0.04;
+            background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px);
         }
-        
-        /* Moving neon lines */
-        .neon-lines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-            pointer-events: none;
+
+        /* === HUD CORNERS === */
+        .hud-corner {
+            position: fixed; z-index: 100; width: 40px; height: 40px; pointer-events: none;
         }
-        
-        .neon-line {
-            position: absolute;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), rgba(0, 255, 136, 0.8), transparent);
-            animation: neonMove 4s linear infinite;
-            opacity: 0.6;
-            filter: blur(1px);
-            box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+        .hud-corner::before, .hud-corner::after {
+            content: ''; position: absolute; background: var(--cyan); opacity: 0.3;
         }
-        
-        .neon-line:nth-child(1) {
-            top: 20%;
-            width: 30%;
-            animation-delay: 0s;
-            animation-duration: 5s;
+        .hud-corner.tl { top: 15px; left: 15px; }
+        .hud-corner.tl::before { top: 0; left: 0; width: 20px; height: 1px; }
+        .hud-corner.tl::after { top: 0; left: 0; width: 1px; height: 20px; }
+        .hud-corner.tr { top: 15px; right: 15px; }
+        .hud-corner.tr::before { top: 0; right: 0; width: 20px; height: 1px; }
+        .hud-corner.tr::after { top: 0; right: 0; width: 1px; height: 20px; }
+        .hud-corner.bl { bottom: 15px; left: 15px; }
+        .hud-corner.bl::before { bottom: 0; left: 0; width: 20px; height: 1px; }
+        .hud-corner.bl::after { bottom: 0; left: 0; width: 1px; height: 20px; }
+        .hud-corner.br { bottom: 15px; right: 15px; }
+        .hud-corner.br::before { bottom: 0; right: 0; width: 20px; height: 1px; }
+        .hud-corner.br::after { bottom: 0; right: 0; width: 1px; height: 20px; }
+
+        /* === TOP BAR === */
+        .top-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 24px; padding-top: calc(18px + env(safe-area-inset-top));
+            background: linear-gradient(180deg, rgba(5,5,8,0.95) 0%, transparent 100%);
         }
-        
-        .neon-line:nth-child(2) {
-            top: 45%;
-            width: 25%;
-            background: linear-gradient(90deg, transparent, var(--secondary), rgba(255, 0, 170, 0.8), transparent);
-            box-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary);
-            animation-delay: -2s;
-            animation-duration: 6s;
+        .top-bar-left { display: flex; align-items: center; gap: 10px; }
+        .status-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--cyan);
+            box-shadow: 0 0 8px var(--cyan); animation: dotPulse 2s ease-in-out infinite;
         }
-        
-        .neon-line:nth-child(3) {
-            top: 70%;
-            width: 35%;
-            background: linear-gradient(90deg, transparent, var(--accent), rgba(0, 170, 255, 0.8), transparent);
-            box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
-            animation-delay: -1s;
-            animation-duration: 4.5s;
+        @keyframes dotPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .status-label {
+            font-family: 'Syne Mono', monospace; font-size: 0.65rem; letter-spacing: 3px;
+            text-transform: uppercase; color: var(--text-dim);
         }
-        
-        .neon-line:nth-child(4) {
-            top: 85%;
-            width: 20%;
-            animation-delay: -3s;
-            animation-duration: 7s;
+        .top-bar-right { display: flex; gap: 12px; }
+        .icon-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+            background: rgba(10, 10, 16, 0.8); color: var(--text-dim); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem;
+            transition: all 0.3s ease; touch-action: manipulation; backdrop-filter: blur(10px);
         }
-        
-        @keyframes neonMove {
-            0% { left: -40%; opacity: 0; }
-            10% { opacity: 0.6; }
-            90% { opacity: 0.6; }
-            100% { left: 110%; opacity: 0; }
+        .icon-btn:active { transform: scale(0.9); }
+        .icon-btn.active { border-color: var(--cyan); color: var(--cyan); box-shadow: var(--glow-cyan); }
+
+        /* === MAIN CONTAINER === */
+        .main {
+            position: relative; z-index: 10; min-height: 100vh; min-height: 100dvh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 80px 20px 40px;
         }
-        
-        /* Floating particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-            pointer-events: none;
+
+        /* === INTRO PANEL === */
+        .panel {
+            width: 100%; max-width: 560px; position: relative;
         }
-        
-        .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: var(--primary);
-            border-radius: 50%;
-            animation: particleFloat 10s linear infinite;
-            opacity: 0;
-            box-shadow: 0 0 6px var(--primary);
+        .panel-frame {
+            position: relative; padding: 48px 32px;
+            background: linear-gradient(145deg, rgba(10,10,16,0.9), rgba(5,5,8,0.95));
+            border: 1px solid var(--border); border-radius: var(--radius);
+            backdrop-filter: blur(20px); overflow: hidden;
+            box-shadow: 0 0 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03);
         }
-        
-        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
-        .particle:nth-child(2) { left: 25%; animation-delay: -2s; background: var(--secondary); box-shadow: 0 0 6px var(--secondary); }
-        .particle:nth-child(3) { left: 40%; animation-delay: -4s; }
-        .particle:nth-child(4) { left: 55%; animation-delay: -1s; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-        .particle:nth-child(5) { left: 70%; animation-delay: -3s; }
-        .particle:nth-child(6) { left: 85%; animation-delay: -5s; background: var(--secondary); box-shadow: 0 0 6px var(--secondary); }
-        .particle:nth-child(7) { left: 15%; animation-delay: -7s; }
-        .particle:nth-child(8) { left: 60%; animation-delay: -8s; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-        
-        @keyframes particleFloat {
-            0% { 
-                transform: translateY(100vh) scale(0);
-                opacity: 0;
-            }
-            10% { 
-                opacity: 0.8;
-                transform: translateY(90vh) scale(1);
-            }
-            90% { 
-                opacity: 0.8;
-            }
-            100% { 
-                transform: translateY(-10vh) scale(0.5);
-                opacity: 0;
-            }
+        .panel-frame::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            opacity: 0.4;
         }
-        
-        /* Glitch effect overlay */
-        .glitch-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-            background: transparent;
-            animation: glitchBg 8s infinite;
+        .panel-frame::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,213,0.03), transparent);
+            animation: panelSweep 6s linear infinite;
         }
-        
-        @keyframes glitchBg {
-            0%, 95%, 100% { 
-                background: transparent;
-            }
-            96% { 
-                background: rgba(255, 0, 170, 0.03);
-                transform: translateX(2px);
-            }
-            97% { 
-                background: rgba(0, 255, 136, 0.03);
-                transform: translateX(-2px);
-            }
-            98% { 
-                background: transparent;
-                transform: translateX(0);
-            }
+        @keyframes panelSweep { 0% { left: -60%; } 100% { left: 160%; } }
+
+        /* === PAGE INDICATOR === */
+        .page-indicator {
+            display: flex; gap: 6px; justify-content: center; margin-bottom: 32px;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px;
-            position: relative;
+        .page-dot {
+            width: 24px; height: 2px; border-radius: 1px;
+            background: var(--text-dim); opacity: 0.3; transition: all 0.5s ease;
         }
-        #intro-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 80vh;
-            min-height: 80dvh;
-            text-align: center;
-            padding: 20px;
+        .page-dot.active { background: var(--cyan); opacity: 1; width: 40px; box-shadow: 0 0 10px var(--cyan); }
+        .page-dot.done { background: var(--cyan); opacity: 0.5; }
+
+        /* === TEXT DISPLAY === */
+        .text-display {
+            min-height: 180px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
         }
-        .intro-box {
-            background: linear-gradient(135deg, rgba(18, 18, 26, 0.95), rgba(10, 10, 15, 0.98));
-            border: 2px solid transparent;
-            border-image: linear-gradient(135deg, var(--primary), var(--secondary)) 1;
-            padding: 40px 30px;
-            max-width: 600px;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            min-height: 280px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        .typewriter {
+            font-family: 'Outfit', sans-serif; font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+            line-height: 2; color: var(--text); font-weight: 300; letter-spacing: 0.02em;
+            opacity: 0; transition: opacity 0.5s ease;
         }
-        .intro-box::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
-            animation: shine 3s infinite;
+        .typewriter.visible { opacity: 1; }
+        .typewriter .char {
+            display: inline-block; opacity: 0; transform: translateY(8px); filter: blur(4px);
+            transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
         }
-        @keyframes shine {
-            0% { left: -100%; }
-            100% { left: 100%; }
+        .typewriter .char.revealed { opacity: 1; transform: translateY(0); filter: blur(0); }
+        .typewriter .char.space { width: 0.3em; }
+        .typewriter .char.break { display: block; height: 0.5em; width: 100%; }
+
+        /* Welcome title */
+        .welcome-title {
+            font-family: 'Outfit', sans-serif; font-weight: 800;
+            font-size: clamp(2.5rem, 10vw, 4.5rem); letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--cyan) 0%, #fff 40%, var(--magenta) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            filter: drop-shadow(0 0 30px rgba(0,255,213,0.3));
+            opacity: 0; transform: scale(0.8); transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
         }
-        
-        /* Electric effect for intro-box */
-        .intro-box.electric-shock {
-            animation: boxElectricShock 0.6s ease-out;
+        .welcome-title.visible { opacity: 1; transform: scale(1); }
+
+        /* Final question */
+        .final-q {
+            font-family: 'Outfit', sans-serif; font-weight: 700;
+            font-size: clamp(1.5rem, 6vw, 2.5rem); letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--cyan), var(--violet));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(139,92,246,0.4));
         }
-        
-        @keyframes boxElectricShock {
-            0% {
-                filter: brightness(1);
-                transform: scale(1);
-            }
-            10% {
-                filter: brightness(1.5) hue-rotate(10deg);
-                transform: scale(1.01) translateX(-2px);
-                box-shadow: 
-                    0 0 30px var(--primary),
-                    0 0 60px rgba(0, 255, 136, 0.4),
-                    inset 0 0 30px rgba(0, 255, 136, 0.1);
-            }
-            20% {
-                filter: brightness(1.2) hue-rotate(-10deg);
-                transform: scale(1.005) translateX(2px);
-            }
-            30% {
-                filter: brightness(2) hue-rotate(5deg);
-                transform: scale(1.015) translateX(-1px);
-                box-shadow: 
-                    0 0 40px var(--accent),
-                    0 0 80px var(--primary),
-                    inset 0 0 40px rgba(0, 255, 136, 0.2);
-            }
-            40% {
-                filter: brightness(1.1);
-                transform: scale(1) translateX(1px);
-            }
-            50% {
-                filter: brightness(2.5) hue-rotate(-5deg);
-                transform: scale(1.01);
-                box-shadow: 
-                    0 0 50px var(--primary),
-                    0 0 100px var(--secondary),
-                    inset 0 0 50px rgba(0, 255, 136, 0.3);
-            }
-            60% {
-                filter: brightness(1.3);
-                transform: scale(1.005);
-            }
-            80% {
-                filter: brightness(1.1);
-                transform: scale(1);
-            }
-            100% {
-                filter: brightness(1);
-                transform: scale(1);
-            }
-        }
-        
-        .intro-box.electric-shock::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(90deg, transparent 0%, rgba(0, 255, 136, 0.3) 50%, transparent 100%);
-            animation: electricSweepBox 0.25s ease-out 2;
-            pointer-events: none;
-            z-index: 10;
-        }
-        
-        @keyframes electricSweepBox {
-            0% {
-                transform: translateX(-100%) skewX(-15deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(200%) skewX(-15deg);
-                opacity: 0;
-            }
-        }
-        
-        /* Cyber text effect */
-        .cyber-text {
-            font-size: clamp(1.1rem, 4vw, 1.4rem);
-            line-height: 1.8;
-            color: var(--primary);
-            text-align: center;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 500;
-            opacity: 0;
-            transform: translateY(20px);
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
-        
-        .cyber-text.welcome {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(2rem, 8vw, 3.5rem);
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.5));
-        }
-        
-        .cyber-text.visible {
-            animation: cyberReveal 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-        }
-        
-        @keyframes cyberReveal {
-            0% {
-                opacity: 0;
-                transform: translateY(30px) scale(0.9);
-                filter: blur(10px);
-                text-shadow: 
-                    0 0 50px rgba(0, 255, 136, 0.8),
-                    0 0 100px rgba(0, 255, 136, 0.4);
-            }
-            30% {
-                opacity: 1;
-                filter: blur(0);
-            }
-            50% {
-                text-shadow: 
-                    -2px 0 var(--secondary),
-                    2px 0 var(--accent),
-                    0 0 20px rgba(0, 255, 136, 0.8);
-            }
-            70% {
-                transform: translateY(0) scale(1.02);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-            }
-        }
-        
-        /* Glitch effect on text */
-        .cyber-text.glitch {
-            animation: cyberReveal 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards,
-                       textGlitch 3s infinite 1s;
-        }
-        
-        @keyframes textGlitch {
-            0%, 92%, 100% {
-                text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-            }
-            93% {
-                text-shadow: -3px 0 var(--secondary), 3px 0 var(--accent);
-                transform: translateX(-2px);
-            }
-            94% {
-                text-shadow: 3px 0 var(--secondary), -3px 0 var(--accent);
-                transform: translateX(2px);
-            }
-            95% {
-                text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-                transform: translateX(0);
-            }
-        }
-        
-        /* Progress bar */
-        .progress-container {
-            width: 100%;
-            max-width: 300px;
-            margin-top: 30px;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .progress-bar::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), transparent);
-            animation: progressShine 2s linear infinite;
-        }
-        
-        @keyframes progressShine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
-            border-radius: 2px;
-            transition: width 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            position: relative;
-            box-shadow: 0 0 10px var(--primary), 0 0 20px rgba(0, 255, 136, 0.5);
-        }
-        
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 8px;
-            height: 8px;
-            background: var(--primary);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
-            animation: progressPulse 1s ease-in-out infinite;
-        }
-        
-        @keyframes progressPulse {
-            0%, 100% { 
-                box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
-                transform: translateY(-50%) scale(1);
-            }
-            50% { 
-                box-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--accent);
-                transform: translateY(-50%) scale(1.3);
-            }
-        }
-        
-        .nav-btn {
-            margin-top: 35px;
-            padding: 16px 50px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            touch-action: manipulation;
-            border-radius: 4px;
-        }
-        .nav-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--primary);
-            transition: left 0.3s ease;
-            z-index: -1;
-        }
-        .nav-btn:hover, .nav-btn:active {
-            color: var(--bg-dark);
-        }
-        .nav-btn:hover::before, .nav-btn:active::before {
-            left: 0;
-        }
-        
-        .nav-btn.start-btn {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border: none;
-            color: var(--bg-dark);
-            padding: 18px 60px;
-            font-size: 1.1rem;
-            animation: pulse 2s infinite;
-        }
-        
-        .nav-btn.start-btn::before {
-            display: none;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 40px rgba(0, 255, 136, 0.8), 0 0 60px rgba(0, 255, 136, 0.4);
-            }
-        }
-        
-        /* Final question style */
-        .cyber-text.final-question {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.3rem, 5vw, 2rem);
-            font-weight: 700;
-            color: var(--accent);
-            text-shadow: 0 0 20px rgba(0, 170, 255, 0.6);
-        }
-        
-        /* Game title */
-        .game-title {
-            display: none;
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.2rem, 4vw, 1.8rem);
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            letter-spacing: 3px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            border-bottom: 1px solid rgba(0, 255, 136, 0.3);
-            text-shadow: none;
-            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.4));
-            opacity: 0;
-            transform: translateY(-10px);
+
+        /* === RIDDLE LABEL === */
+        .riddle-label {
+            display: none; font-family: 'Syne Mono', monospace; font-size: 0.6rem;
+            letter-spacing: 5px; text-transform: uppercase; color: var(--cyan);
+            text-align: center; margin-bottom: 24px; opacity: 0;
             transition: all 0.5s ease;
         }
-        
-        .game-title.visible {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
+        .riddle-label.visible { display: block; opacity: 0.6; }
+        .riddle-label::before, .riddle-label::after { content: '───  '; }
+        .riddle-label::after { content: '  ───'; }
+
+        /* === PROGRESS === */
+        .progress-track {
+            width: 100%; max-width: 200px; margin: 28px auto 0; height: 2px;
+            background: rgba(255,255,255,0.05); border-radius: 1px; overflow: hidden;
         }
-        
-        /* Cards wrapper */
+        .progress-bar {
+            height: 100%; width: 0%; border-radius: 1px;
+            background: linear-gradient(90deg, var(--cyan), var(--violet));
+            transition: width 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 0 12px var(--cyan);
+        }
+
+        /* === NAV BUTTON === */
+        .nav-btn {
+            margin-top: 36px; padding: 16px 48px; border: none; border-radius: 60px;
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+            color: var(--bg); background: var(--cyan); position: relative; overflow: hidden;
+            transition: all 0.3s ease; touch-action: manipulation;
+            box-shadow: 0 0 30px rgba(0,255,213,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        .nav-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        .nav-btn:hover::before { left: 100%; }
+        .nav-btn:active { transform: scale(0.96); }
+
+        .nav-btn.start-btn {
+            background: linear-gradient(135deg, var(--cyan), var(--violet));
+            padding: 20px 64px; font-size: 0.95rem;
+            box-shadow: 0 0 40px rgba(0,255,213,0.4), 0 0 80px rgba(139,92,246,0.2);
+            animation: btnGlow 3s ease-in-out infinite;
+        }
+        @keyframes btnGlow {
+            0%, 100% { box-shadow: 0 0 30px rgba(0,255,213,0.3), 0 0 60px rgba(139,92,246,0.15); }
+            50% { box-shadow: 0 0 50px rgba(0,255,213,0.5), 0 0 100px rgba(139,92,246,0.3); }
+        }
+
+        /* === CARDS === */
         .cards-wrapper {
-            width: 100%;
-            max-width: 1000px;
-            margin-top: 30px;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            width: 100%; max-width: 1000px; margin-top: 32px;
+            opacity: 0; transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
         }
-        
-        .cards-wrapper.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .cards-wrapper.visible { opacity: 1; transform: translateY(0); }
+
+        .cards-grid {
+            display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px;
         }
-        .cards-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
+
         .card {
-            background: var(--bg-card);
-            border: 2px solid rgba(100, 100, 120, 0.3);
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            touch-action: manipulation;
-            user-select: none;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 16px; cursor: pointer; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative; overflow: hidden; touch-action: manipulation; user-select: none;
         }
         .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--card-color, #666), transparent);
-            opacity: 0.5;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--card-accent), transparent); opacity: 0.5;
         }
-        .card:active {
-            transform: scale(0.98);
+        .card::after {
+            content: ''; position: absolute; inset: 0; border-radius: var(--radius);
+            background: radial-gradient(circle at 50% 0%, var(--card-accent), transparent 70%);
+            opacity: 0; transition: opacity 0.3s ease;
         }
+        .card:active { transform: scale(0.98); }
 
-        /* Electric/Cyber selection effect */
+        /* Card selection flash */
         .card.selecting {
-            animation: electricShock 0.6s ease-out;
+            animation: cardSelect 0.5s ease-out;
         }
-        
-        @keyframes electricShock {
-            0% {
-                filter: brightness(1);
-                transform: scale(1);
-            }
-            10% {
-                filter: brightness(2) hue-rotate(20deg);
-                transform: scale(1.02) translateX(-2px);
-                box-shadow: 
-                    0 0 20px var(--primary),
-                    0 0 40px var(--primary),
-                    inset 0 0 20px rgba(0, 255, 136, 0.3);
-            }
-            20% {
-                filter: brightness(1.5) hue-rotate(-20deg);
-                transform: scale(1.01) translateX(2px);
-            }
-            30% {
-                filter: brightness(2.5) hue-rotate(10deg);
-                transform: scale(1.03) translateX(-1px);
-                box-shadow: 
-                    0 0 30px var(--accent),
-                    0 0 60px var(--primary),
-                    inset 0 0 30px rgba(0, 255, 136, 0.4);
-            }
-            40% {
-                filter: brightness(1.2);
-                transform: scale(1) translateX(1px);
-            }
-            50% {
-                filter: brightness(3) hue-rotate(-10deg);
-                transform: scale(1.02);
-                box-shadow: 
-                    0 0 40px var(--primary),
-                    0 0 80px var(--secondary),
-                    inset 0 0 40px rgba(0, 255, 136, 0.5);
-            }
-            60% {
-                filter: brightness(1.5);
-                transform: scale(1.01);
-            }
-            80% {
-                filter: brightness(1.2);
-                transform: scale(1);
-            }
-            100% {
-                filter: brightness(1);
-                transform: scale(1);
-            }
-        }
-        
-        /* Electric sparks overlay */
-        .card.selecting::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(90deg, transparent 0%, rgba(0, 255, 136, 0.4) 50%, transparent 100%);
-            animation: electricSweep 0.3s ease-out 2;
-            pointer-events: none;
-        }
-        
-        @keyframes electricSweep {
-            0% {
-                transform: translateX(-100%) skewX(-20deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(200%) skewX(-20deg);
-                opacity: 0;
-            }
-        }
-        
-        /* Glitch effect on card content during selection */
-        .card.selecting .card-title {
-            animation: textGlitchFast 0.1s steps(2) 6;
-        }
-        
-        .card.selecting .number-cell {
-            animation: cellFlicker 0.08s steps(2) 8;
-        }
-        
-        @keyframes textGlitchFast {
-            0%, 100% {
-                text-shadow: none;
-                transform: translateX(0);
-            }
-            25% {
-                text-shadow: -2px 0 var(--secondary), 2px 0 var(--accent);
-                transform: translateX(-1px);
-            }
-            75% {
-                text-shadow: 2px 0 var(--secondary), -2px 0 var(--accent);
-                transform: translateX(1px);
-            }
-        }
-        
-        @keyframes cellFlicker {
-            0%, 100% {
-                opacity: 1;
-                background: rgba(255, 255, 255, 0.03);
-            }
-            50% {
-                opacity: 0.5;
-                background: rgba(0, 255, 136, 0.3);
-            }
+        @keyframes cardSelect {
+            0% { filter: brightness(1); }
+            20% { filter: brightness(2.5); box-shadow: 0 0 40px var(--card-accent); }
+            40% { filter: brightness(1.2); }
+            60% { filter: brightness(2); box-shadow: 0 0 60px var(--card-accent); }
+            100% { filter: brightness(1); }
         }
 
-        /* Cartella selezionata CORRETTA (verde) */
         .card.selected.correct {
-            border-color: var(--primary);
-            background: rgba(0, 255, 136, 0.08);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            border-color: var(--cyan); background: rgba(0, 255, 213, 0.04);
+            box-shadow: 0 0 30px rgba(0, 255, 213, 0.15), inset 0 0 30px rgba(0, 255, 213, 0.02);
         }
-        .card.selected.correct .card-header {
-            background: var(--primary);
-            color: var(--bg-dark);
-        }
-        .card.selected.correct .card-status {
-            background: var(--bg-dark);
-            color: var(--primary);
-        }
-        .card.selected.correct .number-cell {
-            background: rgba(0, 255, 136, 0.1);
-        }
+        .card.selected.correct::after { opacity: 0.06; }
+        .card.selected.correct .card-header { background: rgba(0, 255, 213, 0.1); }
+        .card.selected.correct .card-badge { background: var(--cyan); color: var(--bg); }
 
-        /* Cartella selezionata SBAGLIATA (rosso) */
         .card.selected.wrong {
-            border-color: var(--error-red);
-            background: rgba(255, 68, 68, 0.08);
-            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+            border-color: var(--magenta); background: rgba(255, 45, 120, 0.04);
+            box-shadow: 0 0 30px rgba(255, 45, 120, 0.15), inset 0 0 30px rgba(255, 45, 120, 0.02);
         }
-        .card.selected.wrong .card-header {
-            background: var(--error-red);
-            color: var(--bg-dark);
-        }
-        .card.selected.wrong .card-status {
-            background: var(--bg-dark);
-            color: var(--error-red);
-        }
-        .card.selected.wrong .number-cell {
-            background: rgba(255, 68, 68, 0.1);
-        }
+        .card.selected.wrong::after { opacity: 0.06; --card-accent: var(--magenta); }
+        .card.selected.wrong .card-header { background: rgba(255, 45, 120, 0.1); }
+        .card.selected.wrong .card-badge { background: var(--magenta); color: var(--bg); }
 
         .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .card-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-        }
-        .card-status {
-            font-size: 0.85rem;
-            padding: 5px 10px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px; margin-bottom: 14px;
+            background: rgba(255,255,255,0.02); border-radius: 10px;
             transition: all 0.3s ease;
         }
+        .card-label {
+            font-family: 'Syne Mono', monospace; font-size: 0.7rem;
+            letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim);
+        }
+        .card-badge {
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; font-weight: 600;
+            padding: 4px 12px; border-radius: 20px;
+            background: rgba(255,255,255,0.06); color: var(--text-dim);
+            transition: all 0.3s ease;
+        }
+
         .numbers-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 4px;
+            display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px;
         }
-        .number-cell {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.03);
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(0.65rem, 2.5vw, 0.85rem);
-            font-weight: 500;
-            border-radius: 3px;
-            transition: all 0.2s ease;
+        .num-cell {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            font-family: 'Syne Mono', monospace; font-size: clamp(0.55rem, 2.2vw, 0.75rem);
+            color: var(--text-dim); background: rgba(255,255,255,0.015);
+            border-radius: 6px; transition: all 0.2s ease;
         }
+        .card.selected.correct .num-cell { color: var(--cyan); background: rgba(0,255,213,0.04); }
+        .card.selected.wrong .num-cell { color: var(--magenta); background: rgba(255,45,120,0.04); }
 
-        /* Card Colors - invertiti per ordine decrescente */
-        .card[data-card="6"] { --card-color: #ffffff; --card-glow: 0 0 20px rgba(255, 255, 255, 0.3); }
-        .card[data-card="5"] { --card-color: #ff44ff; --card-glow: 0 0 20px rgba(255, 68, 255, 0.3); }
-        .card[data-card="4"] { --card-color: #00aaff; --card-glow: 0 0 20px rgba(0, 170, 255, 0.3); }
-        .card[data-card="3"] { --card-color: #44ff44; --card-glow: 0 0 20px rgba(68, 255, 68, 0.3); }
-        .card[data-card="2"] { --card-color: #ffaa00; --card-glow: 0 0 20px rgba(255, 170, 0, 0.3); }
-        .card[data-card="1"] { --card-color: #ff4444; --card-glow: 0 0 20px rgba(255, 68, 68, 0.3); }
+        .card[data-card="6"] { --card-accent: rgba(255,255,255,0.4); }
+        .card[data-card="5"] { --card-accent: rgba(139,92,246,0.5); }
+        .card[data-card="4"] { --card-accent: rgba(0,255,213,0.5); }
+        .card[data-card="3"] { --card-accent: rgba(251,191,36,0.5); }
+        .card[data-card="2"] { --card-accent: rgba(255,45,120,0.5); }
+        .card[data-card="1"] { --card-accent: rgba(99,102,241,0.5); }
 
-        .answer-section {
-            background: var(--bg-card);
-            border: 1px solid rgba(0, 255, 136, 0.2);
-            padding: 25px 20px;
-            text-align: center;
-            position: sticky;
-            bottom: 0;
-            z-index: 10;
+        /* === ANSWER SECTION === */
+        .answer-bar {
+            background: linear-gradient(145deg, rgba(10,10,16,0.95), rgba(5,5,8,0.98));
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 28px 24px; text-align: center; backdrop-filter: blur(20px);
+            position: sticky; bottom: 10px; z-index: 50;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
-        .answer-section h3 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
-            color: var(--primary);
-            margin-bottom: 20px;
-            letter-spacing: 2px;
+        .answer-title {
+            font-family: 'Syne Mono', monospace; font-size: 0.6rem;
+            letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim);
+            margin-bottom: 18px;
         }
-        .answer-input-container {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+        .answer-row { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
         .answer-input {
-            width: 120px;
-            padding: 15px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            color: var(--primary);
-            outline: none;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            -webkit-appearance: none;
-            -moz-appearance: textfield;
+            width: 100px; padding: 14px; font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem; font-weight: 700; text-align: center;
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+            color: var(--cyan); outline: none; border-radius: 12px;
+            transition: all 0.3s ease; -webkit-appearance: none; -moz-appearance: textfield;
         }
-        .answer-input::-webkit-inner-spin-button,
-        .answer-input::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .answer-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-        }
+        .answer-input::-webkit-inner-spin-button, .answer-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+        .answer-input:focus { border-color: var(--cyan); box-shadow: var(--glow-cyan); }
         .submit-btn {
-            padding: 15px 35px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border: none;
-            color: var(--bg-dark);
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            touch-action: manipulation;
-            min-height: 54px;
+            padding: 14px 36px; font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+            background: linear-gradient(135deg, var(--cyan), var(--violet));
+            border: none; color: var(--bg); border-radius: 12px; cursor: pointer;
+            transition: all 0.3s ease; touch-action: manipulation;
+            box-shadow: 0 0 20px rgba(0,255,213,0.2);
         }
-        .submit-btn:active {
-            transform: scale(0.95);
-        }
+        .submit-btn:active { transform: scale(0.96); }
 
-        /* Modale ottimizzata per mobile */
+        /* === MODAL === */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-            animation: fadeIn 0.3s ease;
-            overflow-y: auto;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            z-index: 1000; justify-content: center; align-items: center;
+            padding: 20px; backdrop-filter: blur(10px);
         }
-        .modal-content {
-            background: var(--bg-card);
-            border: 2px solid var(--primary);
-            padding: 30px 20px;
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-height: 90vh;
-            max-height: 90dvh;
-            overflow-y: auto;
-            border-radius: 12px;
+        .modal-overlay.open { display: flex; animation: fadeIn 0.3s ease; }
+        .modal-box {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+            padding: 36px 28px; max-width: 420px; width: 100%; text-align: center;
+            animation: modalIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 0 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
         }
-        .modal-icon {
-            font-size: 3.5rem;
-            margin-bottom: 12px;
+        @keyframes modalIn { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-emoji { font-size: 3rem; margin-bottom: 16px; }
+        .modal-h {
+            font-family: 'Outfit', sans-serif; font-weight: 800;
+            font-size: 1.6rem; margin-bottom: 16px; letter-spacing: -0.02em;
         }
-        .modal-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-        .modal-text {
-            font-size: 1rem;
-            color: var(--text-dim);
-            line-height: 1.6;
-            text-align: left;
-        }
-        .modal-btn {
-            margin-top: 20px;
-            padding: 12px 35px;
-            font-size: 1rem;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            cursor: pointer;
-            border-radius: 8px;
-            touch-action: manipulation;
-        }
-        .modal-btn:active {
-            background: var(--primary);
-            color: var(--bg-dark);
+        .modal-body { font-size: 0.9rem; color: var(--text-dim); line-height: 1.7; text-align: left; }
+        .modal-body strong { color: var(--cyan); font-weight: 600; }
+        .modal-close {
+            margin-top: 24px; padding: 12px 36px; border-radius: 60px;
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 600;
+            letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease;
+            touch-action: manipulation; text-transform: uppercase;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .modal-box.success { border-color: rgba(0,255,213,0.2); }
+        .modal-box.success .modal-h { color: var(--cyan); }
+        .modal-box.success .modal-close { background: var(--cyan); border: none; color: var(--bg); }
+
+        .modal-box.error { border-color: rgba(255,45,120,0.2); }
+        .modal-box.error .modal-h { color: var(--magenta); }
+        .modal-box.error .modal-body { color: var(--magenta); }
+        .modal-box.error .modal-close { background: transparent; border: 1px solid var(--magenta); color: var(--magenta); }
+
+        .password-reveal {
+            margin: 20px 0; padding: 20px; border-radius: 12px;
+            background: rgba(0, 255, 213, 0.05); border: 1px dashed rgba(0, 255, 213, 0.2);
         }
-        @keyframes scaleIn {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        .password-reveal .pw-label {
+            font-family: 'Syne Mono', monospace; font-size: 0.55rem;
+            letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+        .password-reveal .pw-value {
+            font-family: 'Syne Mono', monospace; font-size: 1.3rem;
+            color: var(--cyan); letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(0,255,213,0.5);
         }
 
-        .modal-content.success {
-            border-color: var(--primary);
+        /* === DANGER SHAKE === */
+        body.danger { animation: shake 0.6s ease-out; }
+        body.danger::before {
+            content: ''; position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            background: rgba(255, 45, 120, 0.15); animation: dangerFlash 0.12s ease-out 4;
         }
-        .modal-content.success .modal-icon {
-            color: var(--primary);
-            text-shadow: var(--glow-green);
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
         }
-        .modal-content.success .modal-title {
-            color: var(--primary);
-        }
-        .modal-content.error {
-            border-color: #ff4444;
-        }
-        .modal-content.error .modal-icon {
-            color: #ff4444;
-        }
-        .modal-content.error .modal-title {
-            color: #ff4444;
-        }
-        .modal-content.error .modal-text {
-            color: #ff4444;
-        }
-        .modal-content.error .modal-text p {
-            color: #ff4444;
-        }
-        .modal-content.error .modal-btn {
-            border-color: #ff4444;
-            color: #ff4444;
-        }
-        .modal-content.error .modal-btn:active {
-            background: #ff4444;
-            color: var(--bg-dark);
-        }
-        
-        /* Danger shock effect - wrong answer */
-        body.danger-shock {
-            animation: dangerShock 0.8s ease-out;
-        }
-        
-        body.danger-shock::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 0, 0, 0.3);
-            z-index: 9999;
-            pointer-events: none;
-            animation: dangerFlash 0.15s ease-out 5;
-        }
-        
-        @keyframes dangerShock {
-            0%, 100% {
-                transform: translateX(0);
-                filter: none;
-            }
-            10% {
-                transform: translateX(-10px) skewX(-1deg);
-                filter: hue-rotate(-50deg) brightness(1.2) saturate(2);
-            }
-            20% {
-                transform: translateX(10px) skewX(1deg);
-                filter: hue-rotate(-40deg) saturate(2.5);
-            }
-            30% {
-                transform: translateX(-8px) skewX(-0.5deg);
-                filter: brightness(1.5) saturate(2) hue-rotate(-60deg);
-            }
-            40% {
-                transform: translateX(8px) skewX(0.5deg);
-                filter: hue-rotate(-50deg) saturate(2);
-            }
-            50% {
-                transform: translateX(-5px);
-                filter: hue-rotate(-45deg) brightness(1.3) saturate(2.5);
-            }
-            60% {
-                transform: translateX(5px);
-                filter: hue-rotate(-55deg) saturate(2);
-            }
-            70% {
-                transform: translateX(-3px);
-                filter: brightness(1.1) hue-rotate(-50deg);
-            }
-            80% {
-                transform: translateX(3px);
-                filter: hue-rotate(-40deg);
-            }
-            90% {
-                transform: translateX(-1px);
-                filter: hue-rotate(-30deg);
-            }
-        }
-        
-        @keyframes dangerFlash {
-            0%, 100% {
-                opacity: 0.2;
-                background: rgba(255, 0, 0, 0.2);
-            }
-            50% {
-                opacity: 1;
-                background: rgba(255, 0, 0, 0.5);
-            }
-        }
-        
-        /* Overload effect - correct answer */
-        body.overload {
-            animation: overloadBuild 2s ease-in forwards;
-        }
-        
+        @keyframes dangerFlash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+
+        /* === OVERLOAD === */
         body.overload::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 9998;
-            pointer-events: none;
-            animation: overloadGlow 2s ease-in forwards;
+            content: ''; position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+            animation: overloadGlow 2.2s ease-in forwards;
         }
-        
         body.overload::after {
-            content: '⚡ SOVRACCARICO ⚡';
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.8rem, 6vw, 4rem);
-            font-weight: 900;
-            color: #fff;
-            background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 30px var(--primary)) drop-shadow(0 0 60px var(--accent));
-            z-index: 10000;
-            animation: overloadText 2s ease-in forwards;
-            letter-spacing: 5px;
-            white-space: nowrap;
-            padding: 20px 40px;
+            content: '⚡ OVERLOAD'; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 10000;
+            font-family: 'Outfit', sans-serif; font-size: clamp(2rem, 8vw, 5rem); font-weight: 900;
+            letter-spacing: -0.02em; white-space: nowrap;
+            background: linear-gradient(135deg, var(--cyan), #fff, var(--magenta));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            filter: drop-shadow(0 0 40px var(--cyan)) drop-shadow(0 0 80px var(--violet));
+            animation: overloadText 2.2s ease-in forwards;
         }
-        
-        @keyframes overloadBuild {
-            0% {
-                filter: brightness(1) saturate(1);
-            }
-            30% {
-                filter: brightness(1.1) saturate(1.2);
-            }
-            50% {
-                filter: brightness(1.3) saturate(1.5) hue-rotate(10deg);
-            }
-            70% {
-                filter: brightness(1.5) saturate(2) hue-rotate(-10deg);
-            }
-            85% {
-                filter: brightness(2) saturate(2.5) hue-rotate(20deg);
-            }
-            100% {
-                filter: brightness(3) saturate(3) hue-rotate(-20deg);
-            }
-        }
-        
         @keyframes overloadGlow {
-            0% {
-                background: rgba(0, 0, 0, 0.7);
-                box-shadow: none;
-            }
-            30% {
-                background: rgba(0, 20, 10, 0.8);
-                box-shadow: inset 0 0 100px rgba(0, 255, 136, 0.2);
-            }
-            50% {
-                background: rgba(0, 30, 20, 0.85);
-                box-shadow: inset 0 0 150px rgba(0, 255, 136, 0.3);
-            }
-            70% {
-                background: rgba(0, 40, 30, 0.9);
-                box-shadow: inset 0 0 200px rgba(0, 255, 136, 0.4);
-            }
-            90% {
-                background: rgba(0, 50, 40, 0.9);
-                box-shadow: inset 0 0 300px rgba(0, 255, 136, 0.6);
-            }
-            100% {
-                background: rgba(0, 60, 50, 0.95);
-                box-shadow: inset 0 0 400px rgba(0, 255, 136, 0.8);
-            }
+            0% { background: rgba(0,0,0,0.8); }
+            50% { background: rgba(0,20,15,0.85); box-shadow: inset 0 0 200px rgba(0,255,213,0.2); }
+            100% { background: rgba(0,40,30,0.9); box-shadow: inset 0 0 400px rgba(0,255,213,0.5); }
         }
-        
         @keyframes overloadText {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.3);
-                filter: drop-shadow(0 0 10px var(--primary)) blur(10px);
-            }
-            15% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.1);
-                filter: drop-shadow(0 0 30px var(--primary)) drop-shadow(0 0 60px var(--accent)) blur(0);
-            }
-            25% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-            35%, 45% {
-                transform: translate(-52%, -50%) scale(1.02);
-                filter: drop-shadow(0 0 40px var(--primary)) drop-shadow(0 0 80px var(--secondary));
-            }
-            40%, 50% {
-                transform: translate(-48%, -50%) scale(0.98);
-            }
-            55%, 65% {
-                transform: translate(-50%, -50%) scale(1.05);
-                filter: drop-shadow(0 0 50px var(--primary)) drop-shadow(0 0 100px var(--accent));
-            }
-            70% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-            85% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.3);
-                filter: drop-shadow(0 0 60px var(--primary)) drop-shadow(0 0 120px var(--accent));
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(2.5);
-                filter: drop-shadow(0 0 100px var(--primary)) blur(5px);
-            }
+            0% { opacity: 0; transform: translate(-50%,-50%) scale(0.3); filter: blur(20px) drop-shadow(0 0 10px var(--cyan)); }
+            15% { opacity: 1; transform: translate(-50%,-50%) scale(1.05); filter: blur(0) drop-shadow(0 0 40px var(--cyan)); }
+            50% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+            85% { opacity: 1; transform: translate(-50%,-50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%,-50%) scale(2.5); filter: blur(8px); }
         }
-        
-        /* Overload flash finale */
-        body.overload-flash {
-            animation: overloadFlash 0.5s ease-out forwards;
-        }
-        
         body.overload-flash::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            z-index: 9999;
-            pointer-events: none;
-            animation: flashOut 0.5s ease-out forwards;
+            content: ''; position: fixed; inset: 0; background: white; z-index: 9999;
+            pointer-events: none; animation: flashOut 0.5s ease-out forwards;
         }
-        
-        @keyframes overloadFlash {
-            0% {
-                filter: brightness(5);
-            }
-            100% {
-                filter: brightness(1);
-            }
-        }
-        
-        @keyframes flashOut {
-            0% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-            }
-        }
-        
-        /* Audio toggle button */
-        .audio-toggle {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 15px;
-            background: rgba(10, 10, 15, 0.9);
-            border: 1px solid var(--primary);
-            border-radius: 25px;
-            color: var(--primary);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-        }
-        
-        .audio-toggle:hover, .audio-toggle:active {
-            background: var(--primary);
-            color: var(--bg-dark);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-        }
-        
-        .audio-toggle.playing {
-            border-color: var(--accent);
-            animation: audioPulse 1s ease-in-out infinite;
-        }
-        
-        .audio-toggle.playing .audio-icon {
-            animation: audioWave 0.5s ease-in-out infinite;
-        }
-        
-        @keyframes audioPulse {
-            0%, 100% {
-                box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 20px rgba(0, 255, 136, 0.6), 0 0 30px rgba(0, 170, 255, 0.3);
-            }
-        }
-        
-        @keyframes audioWave {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.2);
-            }
-        }
-        
-        .audio-icon {
-            font-size: 1rem;
-        }
-        
-        /* Language selector */
-        .language-selector {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            display: flex;
-            gap: 10px;
-            background: rgba(10, 10, 15, 0.9);
-            padding: 8px 15px;
-            border-radius: 30px;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-        }
-        
-        .lang-btn {
-            padding: 8px 15px;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            color: var(--text-dim);
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-        }
-        
-        .lang-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        
-        .lang-btn.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: var(--bg-dark);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
-        }
+        @keyframes flashOut { from { opacity: 1; } to { opacity: 0; } }
 
-        /* Electric cursor trail effect */
-        .electric-spark {
-            position: fixed;
-            pointer-events: none;
-            z-index: 9000;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: var(--primary);
-            box-shadow: 
-                0 0 10px var(--primary),
-                0 0 20px var(--primary),
-                0 0 30px var(--accent);
-            animation: sparkFade 0.6s ease-out forwards;
-        }
-        
-        .electric-spark::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-            animation: sparkLine 0.3s ease-out forwards;
-        }
-        
-        .electric-spark::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(90deg);
-            width: 20px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            animation: sparkLine 0.3s ease-out forwards;
-        }
-        
-        .electric-spark.alt::before {
-            transform: translate(-50%, -50%) rotate(45deg);
-            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
-        }
-        
-        .electric-spark.alt::after {
-            transform: translate(-50%, -50%) rotate(-45deg);
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-        }
-        
-        @keyframes sparkFade {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0.2);
-            }
-        }
-        
-        @keyframes sparkLine {
-            0% {
-                width: 30px;
-                opacity: 1;
-            }
-            100% {
-                width: 5px;
-                opacity: 0;
-            }
-        }
-        
-        /* Lightning bolt trail */
-        .lightning-bolt {
-            position: fixed;
-            pointer-events: none;
-            z-index: 8999;
-            font-size: 16px;
-            color: var(--primary);
-            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--accent);
-            animation: boltFade 0.4s ease-out forwards;
-        }
-        
-        @keyframes boltFade {
-            0% {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0.5) rotate(20deg);
-            }
-        }
-
-        /* Password highlight */
-        .password-box {
-            background: rgba(0, 255, 136, 0.1);
-            border: 2px dashed var(--primary);
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .password-box strong {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.3rem;
-            color: var(--primary);
-            letter-spacing: 3px;
-        }
-
-        /* Media queries per schermi più grandi */
+        /* === RESPONSIVE === */
         @media (min-width: 600px) {
-            .cards-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .numbers-grid {
-                gap: 5px;
-            }
+            .cards-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 900px) {
+            .cards-grid { grid-template-columns: repeat(3, 1fr); }
+            .card:hover { transform: translateY(-4px); border-color: var(--card-accent); box-shadow: 0 8px 40px rgba(0,0,0,0.3); }
+            .card:hover::after { opacity: 0.04; }
+            .answer-bar { position: relative; bottom: auto; }
         }
 
-        @media (min-width: 900px) {
-            .cards-container {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .card:hover {
-                transform: translateY(-5px) scale(1.02);
-                border-color: var(--card-color, #666);
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), var(--card-glow, none);
-            }
-            .answer-section {
-                position: relative;
-            }
-        }
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 2px; }
+        * { scrollbar-width: thin; scrollbar-color: var(--cyan) transparent; }
     </style>
 </head>
 <body>
-    <div class="background-animation"></div>
-    <div class="grid-overlay"></div>
-    <div class="scanlines"></div>
-    <div class="glitch-overlay"></div>
-    
-    <!-- Neon lines che attraversano lo schermo -->
-    <div class="neon-lines">
-        <div class="neon-line"></div>
-        <div class="neon-line"></div>
-        <div class="neon-line"></div>
-        <div class="neon-line"></div>
-    </div>
-    
-    <!-- Particelle fluttuanti -->
-    <div class="particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-    </div>
+    <canvas id="bg-canvas"></canvas>
+    <div class="grain"></div>
+    <div class="vignette"></div>
+    <div class="scanline"></div>
+    <div class="hud-corner tl"></div>
+    <div class="hud-corner tr"></div>
+    <div class="hud-corner bl"></div>
+    <div class="hud-corner br"></div>
 
-    <!-- Pulsante Fullscreen -->
-    <button class="fullscreen-btn" id="fullscreen-btn" title="Schermo intero">
-        <span>⛶</span>
-        <span>FULLSCREEN</span>
-    </button>
-    
-    <!-- Install Prompt per PWA -->
-    <div class="install-prompt" id="install-prompt">
-        <p>📱 Aggiungi alla schermata Home per un'esperienza senza barra!</p>
-        <button class="install-btn" id="install-btn">Installa</button>
-        <button class="close-prompt" id="close-prompt">Dopo</button>
-    </div>
-
-    <!-- Audio generato via Web Audio API - nessun file esterno -->
-    
-    <!-- Pulsante audio - solo prima pagina -->
-    <button class="audio-toggle" id="audio-toggle" title="Attiva/Disattiva musica">
-        <span class="audio-icon">🔇</span>
-        <span class="audio-text">AUDIO</span>
-    </button>
-    
-    <!-- Selettore lingua - solo prima pagina -->
-    <div class="language-selector" id="language-selector">
-        <button class="lang-btn active" data-lang="it">🇮🇹 Italiano</button>
-        <button class="lang-btn" data-lang="en">🇬🇧 English</button>
-    </div>
-
-    <div class="container">
-        <section id="intro-screen">
-            <div class="intro-box">
-                <h2 class="game-title" id="game-title">INDOVINELLO #1</h2>
-                <p class="cyber-text" id="intro-text"></p>
-                <div class="progress-container" id="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
-                    </div>
-                </div>
-                <button class="nav-btn" id="nav-btn">Successivo →</button>
-            </div>
-            
-            <!-- Cards wrapper che appare nell'ultima pagina -->
-            <div class="cards-wrapper" id="cards-wrapper" style="display: none;">
-                <div class="cards-container" id="cards-container"></div>
-                <div class="answer-section">
-                    <h3>🔢 INSERISCI IL NUMERO</h3>
-                    <div class="answer-input-container">
-                        <input type="number" inputmode="numeric" pattern="[0-9]*" class="answer-input" id="answer-input" placeholder="?" min="1" max="60">
-                        <button class="submit-btn" id="submit-btn">Verifica</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-    <div class="modal-overlay" id="modal">
-        <div class="modal-content" id="modal-content">
-            <div class="modal-icon" id="modal-icon"></div>
-            <h2 class="modal-title" id="modal-title"></h2>
-            <div class="modal-text" id="modal-text"></div>
-            <button class="modal-btn" id="modal-btn">OK</button>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <div class="status-dot"></div>
+            <span class="status-label">ENIGMA ACTIVE</span>
+        </div>
+        <div class="top-bar-right">
+            <button class="icon-btn" id="audio-btn" title="Toggle music">🔇</button>
+            <button class="icon-btn" id="fs-btn" title="Fullscreen">⛶</button>
         </div>
     </div>
+
+    <div class="main">
+        <div class="panel">
+            <div class="riddle-label" id="riddle-label">RIDDLE #1</div>
+            <div class="panel-frame">
+                <div class="page-indicator" id="page-indicator"></div>
+                <div class="text-display" id="text-display"></div>
+                <div class="progress-track" id="progress-track">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <button class="nav-btn" id="nav-btn">Next →</button>
+            </div>
+        </div>
+
+        <div class="cards-wrapper" id="cards-wrapper" style="display:none;">
+            <div class="cards-grid" id="cards-grid"></div>
+            <div class="answer-bar">
+                <div class="answer-title">Enter the number</div>
+                <div class="answer-row">
+                    <input type="number" inputmode="numeric" pattern="[0-9]*" class="answer-input" id="answer-input" placeholder="?" min="1" max="60">
+                    <button class="submit-btn" id="submit-btn">Verify</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-box" id="modal-box">
+            <div class="modal-emoji" id="modal-emoji"></div>
+            <h2 class="modal-h" id="modal-h"></h2>
+            <div class="modal-body" id="modal-body"></div>
+            <button class="modal-close" id="modal-close">OK</button>
+        </div>
+    </div>
+
+    <div class="install-prompt" id="install-prompt" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1002;background:rgba(10,10,16,0.95);border:1px solid var(--border);border-radius:16px;padding:16px 20px;max-width:90%;text-align:center;backdrop-filter:blur(20px);">
+        <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:12px;">📱 Add to Home Screen for a bar-free experience</p>
+        <button id="install-btn" style="padding:8px 20px;background:var(--cyan);border:none;border-radius:20px;color:var(--bg);font-family:'Space Grotesk',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;margin-right:8px;">Install</button>
+        <button id="close-prompt" style="padding:8px 16px;background:transparent;border:1px solid var(--text-dim);border-radius:20px;color:var(--text-dim);font-size:0.75rem;cursor:pointer;">Later</button>
+    </div>
+
     <script>
-        // Traduzioni
-        const TRANSLATIONS = {
-            it: {
-                pages: [
-                    { text: "BENVENUTO!!", isWelcome: true },
-                    { text: "Se stai leggendo queste parole,\nsignifica che hai fatto il primo passo.\n\nGrazie per avermi scannerizzato." },
-                    { text: "Da questo preciso istante,\nla realtà che ti circonda cambia volto:\n\nstai per entrare in un gioco di ruolo\nnel mondo reale." },
-                    { text: "In tutto il comune sono nascosti\n10 enigmi.\n\nNove ti attendono ancora...\nma solo uno è davanti a te ora." },
-                    { text: "Ogni enigma è celato sotto forma\ndi QR code, pronto a essere scoperto.\n\nMa attenzione: nulla è lasciato al caso.\n\nGli indovinelli devono essere risolti\nin ordine crescente, uno dopo l'altro." },
-                    { text: "Ogni volta che supererai una prova,\notterrai una password segreta.\n\nSolo quella chiave ti permetterà\ndi sbloccare l'enigma successivo.\n\nRicorda:\npiù alto è il numero,\npiù grande sarà la sfida." },
-                    { text: "Se avrai il coraggio, l'ingegno\ne la determinazione di arrivare\nfino alla fine...\n\n✨ una sorpresa ti attende ✨" },
-                    { text: "Allora dimmi:\n\nsei pronto a partire\nper l'avventura?", isLastIntro: true },
-                    { text: "Sto pensando a un numero segreto,\nnascosto tra 1 e 60.\n\nÈ lì, invisibile…\nin attesa di essere scoperto.", isGame: true },
-                    { text: "Davanti a te vedi diverse cartelle.\n\nEsplorale una alla volta:\nselezionale, osserva con attenzione\n\ne io ti rivelerò solo una cosa essenziale…\n\nse il numero che cerchi\nsi nasconde lì oppure no.", isGame: true },
-                    { text: "Quando avrai individuato\ntutte le cartelle corrette,\n\nfermati.\n\nRespira.", isGame: true },
-                    { text: "È il momento di usare la logica,\nl'intuizione e il tuo ingegno.\n\nMetti insieme gli indizi,\ncollega i frammenti della verità\n\ne dimmi, senza esitazione:", isGame: true },
-                    { text: "Qual è il numero\na cui sto pensando?", isGame: true, showCards: true, isFinal: true }
-                ],
-                gameTitle: "INDOVINELLO #1",
-                nextBtn: "Successivo →",
-                startBtn: "Iniziamo! →",
-                cardStatus: "Tocca per vedere",
-                cardYes: "✓ SÌ, è qui!",
-                cardNo: "✗ NO, non è qui!",
-                inputLabel: "INSERISCI IL NUMERO",
-                verifyBtn: "Verifica",
-                errorTitle: "ERRORE",
-                errorText1: "Il numero non è corretto.",
-                errorText2: "Rivedi le tue scelte tra le cartelle e riprova.",
-                errorText3: "Il numero a cui sto pensando è presente nelle cartelle in cui ti ho detto che è presente.",
-                successTitle: "ESATTO!",
-                successText1: "Il numero era proprio",
-                successText2: "Hai superato questa prova con astuzia.",
-                successText3: "Il trucco dietro questo enigma è osservare il primo numero di ogni cartella, infatti il primo numero che compare è una potenza di 2.",
-                successText4: "Il numero segreto appare solo nelle cartelle i cui valori, sommati, danno esattamente il numero pensato.",
-                successText5: "Esempio: se il numero è 37 → 32 + 4 + 1 → Cartelle 6, 3 e 1.",
-                passwordLabel: "🔐 PASSWORD PER LA SFIDA SUCCESSIVA:",
-                successText6: "Conservala con cura. Ti servirà per proseguire nell'avventura.",
-                successText7: "Buona fortuna... ne avrai bisogno.",
-                alertInvalid: "Inserisci un numero valido tra 1 e 60!"
-            },
-            en: {
-                pages: [
-                    { text: "WELCOME!!", isWelcome: true },
-                    { text: "If you're reading these words,\nit means you've taken the first step.\n\nThank you for scanning me." },
-                    { text: "From this very moment,\nthe reality around you changes:\n\nyou're about to enter a role-playing game\nin the real world." },
-                    { text: "Throughout the municipality,\n10 riddles are hidden.\n\nNine still await you...\nbut only one is in front of you now." },
-                    { text: "Each riddle is concealed\nas a QR code, ready to be discovered.\n\nBut beware: nothing is left to chance.\n\nThe puzzles must be solved\nin ascending order, one after another." },
-                    { text: "Every time you pass a challenge,\nyou'll receive a secret password.\n\nOnly that key will allow you\nto unlock the next riddle.\n\nRemember:\nthe higher the number,\nthe greater the challenge." },
-                    { text: "If you have the courage, wit\nand determination to reach\nthe end...\n\n✨ a surprise awaits you ✨" },
-                    { text: "So tell me:\n\nare you ready to start\nthe adventure?", isLastIntro: true },
-                    { text: "I'm thinking of a secret number,\nhidden between 1 and 60.\n\nIt's there, invisible…\nwaiting to be discovered.", isGame: true },
-                    { text: "In front of you, you see several folders.\n\nExplore them one at a time:\nselect them, observe carefully\n\nand I will reveal only one essential thing…\n\nwhether the number you seek\nis hidden there or not.", isGame: true },
-                    { text: "When you have identified\nall the correct folders,\n\nstop.\n\nBreathe.", isGame: true },
-                    { text: "It's time to use logic,\nintuition and your wit.\n\nPut together the clues,\nconnect the fragments of truth\n\nand tell me, without hesitation:", isGame: true },
-                    { text: "What is the number\nI'm thinking of?", isGame: true, showCards: true, isFinal: true }
-                ],
-                gameTitle: "RIDDLE #1",
-                nextBtn: "Next →",
-                startBtn: "Let's go! →",
-                cardStatus: "Tap to reveal",
-                cardYes: "✓ YES, it's here!",
-                cardNo: "✗ NO, not here!",
-                inputLabel: "ENTER THE NUMBER",
-                verifyBtn: "Verify",
-                errorTitle: "ERROR",
-                errorText1: "The number is incorrect.",
-                errorText2: "Review your choices among the folders and try again.",
-                errorText3: "The number I'm thinking of is present in the folders where I told you it is.",
-                successTitle: "CORRECT!",
-                successText1: "The number was indeed",
-                successText2: "You passed this challenge with cunning.",
-                successText3: "The trick behind this riddle is to observe the first number in each folder - the first number that appears is a power of 2.",
-                successText4: "The secret number appears only in the folders whose values, when added together, give exactly the number I was thinking of.",
-                successText5: "Example: if the number is 37 → 32 + 4 + 1 → Folders 6, 3 and 1.",
-                passwordLabel: "🔐 PASSWORD FOR THE NEXT CHALLENGE:",
-                successText6: "Keep it safe. You'll need it to continue the adventure.",
-                successText7: "Good luck... you'll need it.",
-                alertInvalid: "Enter a valid number between 1 and 60!"
+    // ═══════════════════════════════════════
+    // BACKGROUND CANVAS - Particle field
+    // ═══════════════════════════════════════
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouse = { x: -1000, y: -1000 };
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.3;
+            this.vy = (Math.random() - 0.5) * 0.3;
+            this.size = Math.random() * 1.5 + 0.5;
+            this.alpha = Math.random() * 0.3 + 0.05;
+            this.color = Math.random() > 0.7 ? '0,255,213' : Math.random() > 0.5 ? '139,92,246' : '255,45,120';
+        }
+        update() {
+            const dx = mouse.x - this.x;
+            const dy = mouse.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 150) {
+                const force = (150 - dist) / 150 * 0.02;
+                this.vx -= dx * force * 0.01;
+                this.vy -= dy * force * 0.01;
             }
-        };
-        
-        let currentLang = 'it';
-        let INTRO_PAGES = TRANSLATIONS[currentLang].pages;
-        
-        // Genera numero segreto e password casuale
-        const SECRET_NUMBER = Math.floor(Math.random() * 60) + 1;
-        const RANDOM_PASSWORD = 'ENIGMA2-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vx *= 0.99;
+            this.vy *= 0.99;
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${this.color}, ${this.alpha})`;
+            ctx.fill();
+        }
+    }
 
-        // Pagine dell'introduzione e del gioco
-        // (le pagine sono in TRANSLATIONS sopra)
+    for (let i = 0; i < 80; i++) particles.push(new Particle());
 
-        let currentPage = 0;
-
-        function generateCardNumbers(cardIndex) {
-            const power = Math.pow(2, cardIndex);
-            const numbers = [];
-            for (let n = 1; n <= 60; n++) {
-                if ((n & power) !== 0) {
-                    numbers.push(n);
+    function drawConnections() {
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(0, 255, 213, ${0.06 * (1 - dist / 120)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
                 }
             }
-            return numbers;
+        }
+    }
+
+    function animateBg() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        drawConnections();
+        requestAnimationFrame(animateBg);
+    }
+    animateBg();
+
+    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    document.addEventListener('touchmove', e => {
+        if (e.touches.length > 0) { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; }
+    }, { passive: true });
+
+    // ═══════════════════════════════════════
+    // GAME LOGIC
+    // ═══════════════════════════════════════
+    const PAGES = [
+        { text: "WELCOME", isWelcome: true },
+        { text: "If you're reading these words, it means you've taken the first step.\n\nThank you for scanning me." },
+        { text: "From this very moment, the reality around you changes.\n\nYou're about to enter a role-playing game in the real world." },
+        { text: "Throughout the municipality, 10 riddles are hidden.\n\nNine still await you… but only one is in front of you now." },
+        { text: "Each riddle is concealed as a QR code, ready to be discovered.\n\nThe puzzles must be solved in ascending order, one after another." },
+        { text: "Every time you pass a challenge, you'll receive a secret password.\n\nOnly that key will unlock the next riddle.\n\nThe higher the number, the greater the challenge." },
+        { text: "If you have the courage, wit and determination to reach the end…\n\n✨ a surprise awaits you ✨" },
+        { text: "So tell me:\n\nAre you ready to start the adventure?", isLastIntro: true },
+        { text: "I'm thinking of a secret number, hidden between 1 and 60.\n\nIt's there, invisible… waiting to be discovered.", isGame: true },
+        { text: "In front of you, you see several folders.\n\nSelect them, observe carefully — and I will reveal whether the number you seek is hidden there or not.", isGame: true },
+        { text: "When you have identified all the correct folders…\n\nStop. Breathe.", isGame: true },
+        { text: "It's time to use logic, intuition and your wit.\n\nPut together the clues, connect the fragments of truth and tell me, without hesitation:", isGame: true },
+        { text: "What is the number I'm thinking of?", isGame: true, showCards: true, isFinal: true }
+    ];
+
+    const SECRET = Math.floor(Math.random() * 60) + 1;
+    const PASSWORD = 'ENIGMA2-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    let page = 0;
+    let hasWon = false;
+    let typing = false;
+
+    function genNumbers(idx) {
+        const pw = Math.pow(2, idx), nums = [];
+        for (let n = 1; n <= 60; n++) { if ((n & pw) !== 0) nums.push(n); }
+        return nums;
+    }
+
+    const CARDS = [
+        { id: 6, label: 'FOLDER 06', nums: genNumbers(5) },
+        { id: 5, label: 'FOLDER 05', nums: genNumbers(4) },
+        { id: 4, label: 'FOLDER 04', nums: genNumbers(3) },
+        { id: 3, label: 'FOLDER 03', nums: genNumbers(2) },
+        { id: 2, label: 'FOLDER 02', nums: genNumbers(1) },
+        { id: 1, label: 'FOLDER 01', nums: genNumbers(0) }
+    ];
+
+    const $ = id => document.getElementById(id);
+    const textDisplay = $('text-display');
+    const progressBar = $('progress-bar');
+    const progressTrack = $('progress-track');
+    const navBtn = $('nav-btn');
+    const riddleLabel = $('riddle-label');
+    const cardsWrapper = $('cards-wrapper');
+    const cardsGrid = $('cards-grid');
+    const pageIndicator = $('page-indicator');
+    const answerInput = $('answer-input');
+
+    // Build page dots
+    PAGES.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'page-dot';
+        pageIndicator.appendChild(dot);
+    });
+
+    function updateDots() {
+        const dots = pageIndicator.querySelectorAll('.page-dot');
+        dots.forEach((d, i) => {
+            d.className = 'page-dot';
+            if (i === page) d.classList.add('active');
+            else if (i < page) d.classList.add('done');
+        });
+    }
+
+    function typeReveal(container, text, isWelcome, isFinal) {
+        container.innerHTML = '';
+        if (isWelcome) {
+            const h = document.createElement('div');
+            h.className = 'welcome-title';
+            h.textContent = text;
+            container.appendChild(h);
+            requestAnimationFrame(() => h.classList.add('visible'));
+            return;
         }
 
-        // ORDINE DECRESCENTE: da 32 (cartella 6) a 1 (cartella 1)
-        const CARDS_DATA = [
-            { id: 6, title: 'CARTELLA 6', numbers: generateCardNumbers(5) },
-            { id: 5, title: 'CARTELLA 5', numbers: generateCardNumbers(4) },
-            { id: 4, title: 'CARTELLA 4', numbers: generateCardNumbers(3) },
-            { id: 3, title: 'CARTELLA 3', numbers: generateCardNumbers(2) },
-            { id: 2, title: 'CARTELLA 2', numbers: generateCardNumbers(1) },
-            { id: 1, title: 'CARTELLA 1', numbers: generateCardNumbers(0) }
-        ];
+        const wrapper = document.createElement('div');
+        wrapper.className = 'typewriter' + (isFinal ? ' final-q' : '');
+        container.appendChild(wrapper);
 
-        let selectedCards = new Set();
-
-        const introText = document.getElementById('intro-text');
-        const progressFill = document.getElementById('progress-fill');
-        const progressContainer = document.getElementById('progress-container');
-        const introBox = document.querySelector('.intro-box');
-        const navBtn = document.getElementById('nav-btn');
-        const introScreen = document.getElementById('intro-screen');
-        const gameTitle = document.getElementById('game-title');
-        const cardsWrapper = document.getElementById('cards-wrapper');
-        const cardsContainer = document.getElementById('cards-container');
-        const answerInput = document.getElementById('answer-input');
-        const submitBtn = document.getElementById('submit-btn');
-        const modal = document.getElementById('modal');
-        const modalContent = document.getElementById('modal-content');
-        const modalIcon = document.getElementById('modal-icon');
-        const modalTitle = document.getElementById('modal-title');
-        const modalText = document.getElementById('modal-text');
-        const modalBtn = document.getElementById('modal-btn');
-        const languageSelector = document.getElementById('language-selector');
-        const langBtns = document.querySelectorAll('.lang-btn');
-        const inputLabel = document.querySelector('.answer-section h3');
-
-        function updateProgressBar() {
-            const progress = ((currentPage + 1) / INTRO_PAGES.length) * 100;
-            progressFill.style.width = progress + '%';
+        const chars = [];
+        for (const ch of text) {
+            if (ch === '\n') {
+                const br = document.createElement('span');
+                br.className = 'char break';
+                wrapper.appendChild(br);
+                chars.push(br);
+            } else if (ch === ' ') {
+                const sp = document.createElement('span');
+                sp.className = 'char space';
+                sp.innerHTML = '&nbsp;';
+                wrapper.appendChild(sp);
+                chars.push(sp);
+            } else {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.textContent = ch;
+                wrapper.appendChild(span);
+                chars.push(span);
+            }
         }
 
-        function showPage(pageIndex) {
-            const page = INTRO_PAGES[pageIndex];
-            const t = TRANSLATIONS[currentLang];
-            
-            // Mostra/nascondi audio toggle e language selector solo sulla prima pagina
-            if (pageIndex === 0) {
-                audioToggle.style.display = 'flex';
-                languageSelector.style.display = 'flex';
+        requestAnimationFrame(() => wrapper.classList.add('visible'));
+
+        typing = true;
+        let idx = 0;
+        const interval = setInterval(() => {
+            if (idx < chars.length) {
+                chars[idx].classList.add('revealed');
+                idx++;
             } else {
-                audioToggle.style.display = 'none';
-                languageSelector.style.display = 'none';
+                clearInterval(interval);
+                typing = false;
             }
-            
-            // Reset animation
-            introText.classList.remove('visible', 'glitch', 'welcome', 'final-question');
-            introText.style.opacity = '0';
-            
-            // Set text
-            introText.innerHTML = page.text.replace(/\n/g, '<br>');
-            
-            // Add classes
-            if (page.isWelcome) {
-                introText.classList.add('welcome');
-            }
-            if (page.isFinal) {
-                introText.classList.add('final-question');
-            }
-            
-            // Show/hide game title (from page 9 onwards - index 8)
-            if (page.isGame) {
-                gameTitle.textContent = t.gameTitle;
-                gameTitle.classList.add('visible');
-            } else {
-                gameTitle.classList.remove('visible');
-            }
-            
-            // Trigger animation after a small delay
+        }, 25);
+
+        // Allow skip
+        wrapper._skipFn = () => {
+            clearInterval(interval);
+            chars.forEach(c => c.classList.add('revealed'));
+            typing = false;
+        };
+    }
+
+    function showPage(idx) {
+        const p = PAGES[idx];
+
+        if (idx === 0) {
+            $('audio-btn').style.display = 'flex';
+        } else {
+            $('audio-btn').style.display = 'none';
+        }
+
+        if (p.isGame) {
+            riddleLabel.classList.add('visible');
+        } else {
+            riddleLabel.classList.remove('visible');
+        }
+
+        typeReveal(textDisplay, p.text, p.isWelcome, p.isFinal);
+
+        if (p.showCards) {
+            cardsWrapper.style.display = 'block';
+            setTimeout(() => cardsWrapper.classList.add('visible'), 200);
+            buildCards();
+        } else {
+            cardsWrapper.classList.remove('visible');
+            cardsWrapper.style.display = 'none';
+        }
+
+        if (p.isFinal) {
+            navBtn.style.display = 'none';
+            progressTrack.style.display = 'none';
+        } else if (p.isLastIntro) {
+            navBtn.textContent = "Let's go →";
+            navBtn.classList.add('start-btn');
+            navBtn.style.display = 'inline-block';
+            progressTrack.style.display = 'block';
+        } else {
+            navBtn.textContent = 'Next →';
+            navBtn.classList.remove('start-btn');
+            navBtn.style.display = 'inline-block';
+            progressTrack.style.display = 'block';
+        }
+
+        progressBar.style.width = ((idx + 1) / PAGES.length * 100) + '%';
+        updateDots();
+    }
+
+    function nextPage() {
+        // Skip typing if active
+        const tw = textDisplay.querySelector('.typewriter');
+        if (typing && tw && tw._skipFn) { tw._skipFn(); return; }
+
+        if (page < PAGES.length - 1) {
+            page++;
+            showPage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function buildCards() {
+        cardsGrid.innerHTML = '';
+        CARDS.forEach((c, i) => {
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.dataset.card = c.id;
+            el.style.animationDelay = (i * 0.08) + 's';
+            const has = c.nums.includes(SECRET);
+            el.innerHTML = `
+                <div class="card-header">
+                    <span class="card-label">${c.label}</span>
+                    <span class="card-badge">Tap to reveal</span>
+                </div>
+                <div class="numbers-grid">
+                    ${c.nums.map(n => `<div class="num-cell">${n}</div>`).join('')}
+                </div>`;
+            el.addEventListener('click', () => toggleCard(el, c.id, has));
+            cardsGrid.appendChild(el);
+        });
+    }
+
+    let selected = new Set();
+    function toggleCard(el, id, has) {
+        const was = el.classList.contains('selected');
+        el.classList.add('selecting');
+        setTimeout(() => el.classList.remove('selecting'), 500);
+        el.classList.remove('selected', 'correct', 'wrong');
+
+        if (!was) {
             setTimeout(() => {
-                introText.classList.add('visible', 'glitch');
-            }, 100);
-            
-            // Show/hide cards
-            if (page.showCards) {
-                cardsWrapper.style.display = 'block';
-                setTimeout(() => {
-                    cardsWrapper.classList.add('visible');
-                }, 300);
-                createCards();
-                // Aggiorna label input
-                inputLabel.innerHTML = '🔢 ' + t.inputLabel;
-                submitBtn.textContent = t.verifyBtn;
-            } else {
-                cardsWrapper.classList.remove('visible');
-                cardsWrapper.style.display = 'none';
-            }
-            
-            // Update button and progress
-            if (page.isFinal) {
-                navBtn.style.display = 'none';
-                progressContainer.style.display = 'none';
-            } else if (page.isLastIntro) {
-                navBtn.textContent = t.startBtn;
-                navBtn.classList.add('start-btn');
-                navBtn.style.display = 'inline-block';
-                progressContainer.style.display = 'block';
-            } else {
-                navBtn.textContent = t.nextBtn;
-                navBtn.classList.remove('start-btn');
-                navBtn.style.display = 'inline-block';
-                progressContainer.style.display = 'block';
-            }
-            
-            // Update progress bar
-            updateProgressBar();
+                el.classList.add('selected');
+                el.classList.add(has ? 'correct' : 'wrong');
+                el.querySelector('.card-badge').textContent = has ? '✓ YES' : '✗ NO';
+            }, 250);
+            selected.add(id);
+        } else {
+            el.querySelector('.card-badge').textContent = 'Tap to reveal';
+            selected.delete(id);
         }
+    }
 
-        function nextPage() {
-            if (currentPage < INTRO_PAGES.length - 1) {
-                // Add electric effect to intro box
-                introBox.classList.add('electric-shock');
-                setTimeout(() => {
-                    introBox.classList.remove('electric-shock');
-                }, 600);
-                
-                currentPage++;
-                showPage(currentPage);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+    function checkAnswer() {
+        const val = parseInt(answerInput.value);
+        if (isNaN(val) || val < 1 || val > 60) {
+            triggerDanger();
+            showModal('error', '⚠️', 'ERROR', '<p>Enter a valid number between 1 and 60.</p>');
+            return;
         }
-
-        function createCards() {
-            const t = TRANSLATIONS[currentLang];
-            cardsContainer.innerHTML = '';
-            CARDS_DATA.forEach(card => {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card';
-                cardElement.dataset.card = card.id;
-                const hasNumber = card.numbers.includes(SECRET_NUMBER);
-
-                cardElement.innerHTML = `
-                    <div class="card-header">
-                        <span class="card-title">${card.title}</span>
-                        <span class="card-status">${t.cardStatus}</span>
-                    </div>
-                    <div class="numbers-grid">
-                        ${card.numbers.map(n => `<div class="number-cell">${n}</div>`).join('')}
-                    </div>
-                `;
-
-                cardElement.addEventListener('click', () => toggleCard(cardElement, card.id, hasNumber));
-                cardsContainer.appendChild(cardElement);
-            });
+        if (val === SECRET) {
+            triggerOverload();
+        } else {
+            triggerDanger();
+            showModal('error', '❌', 'WRONG', `
+                <p>The number is incorrect.</p>
+                <p style="margin-top:12px;">Review your choices among the folders and try again.</p>
+                <p style="margin-top:12px;">The number I'm thinking of is present in the folders where I told you it is.</p>
+            `);
         }
+    }
 
-        function toggleCard(element, cardId, hasNumber) {
-            const t = TRANSLATIONS[currentLang];
-            const wasSelected = element.classList.contains('selected');
-            
-            // Add electric effect
-            element.classList.add('selecting');
-            setTimeout(() => {
-                element.classList.remove('selecting');
-            }, 600);
-            
-            element.classList.remove('selected', 'correct', 'wrong');
+    function triggerDanger() {
+        document.body.classList.add('danger');
+        setTimeout(() => document.body.classList.remove('danger'), 700);
+    }
 
-            if (!wasSelected) {
-                setTimeout(() => {
-                    element.classList.add('selected');
-                    if (hasNumber) {
-                        element.classList.add('correct');
-                        element.querySelector('.card-status').textContent = t.cardYes;
-                    } else {
-                        element.classList.add('wrong');
-                        element.querySelector('.card-status').textContent = t.cardNo;
-                    }
-                }, 300);
-                selectedCards.add(cardId);
-            } else {
-                element.querySelector('.card-status').textContent = t.cardStatus;
-                selectedCards.delete(cardId);
-            }
-        }
+    function triggerOverload() {
+        document.body.classList.add('overload');
+        setTimeout(() => {
+            document.body.classList.remove('overload');
+            document.body.classList.add('overload-flash');
+        }, 2200);
+        setTimeout(() => {
+            document.body.classList.remove('overload-flash');
+            hasWon = true;
+            showModal('success', '', 'CORRECT', `
+                <p>The number was <strong>${SECRET}</strong>.</p>
+                <p style="margin-top:12px;">You passed this challenge with cunning.</p>
+                <p style="margin-top:20px;">The trick: the first number in each folder is a power of 2. The secret number appears only in folders whose power-of-2 values sum to the answer.</p>
+                <div style="margin:16px 0;padding:12px;background:rgba(255,255,255,0.02);border-radius:10px;font-family:'Syne Mono',monospace;font-size:0.7rem;line-height:2;color:var(--text-dim);">
+                    Folder 06 → 32 (2⁵)<br>Folder 05 → 16 (2⁴)<br>Folder 04 → 8 (2³)<br>
+                    Folder 03 → 4 (2²)<br>Folder 02 → 2 (2¹)<br>Folder 01 → 1 (2⁰)
+                </div>
+                <p><em>Example: 37 → 32 + 4 + 1 → Folders 06, 03 & 01</em></p>
+                <div class="password-reveal">
+                    <div class="pw-label">Password for the next challenge</div>
+                    <div class="pw-value">${PASSWORD}</div>
+                </div>
+                <p>Keep it safe. You'll need it.<br><strong>Good luck… you'll need it.</strong></p>
+            `);
+        }, 2700);
+    }
 
-        function checkAnswer() {
-            const t = TRANSLATIONS[currentLang];
-            const userAnswer = parseInt(answerInput.value);
+    function showModal(type, emoji, title, html) {
+        $('modal-box').className = 'modal-box ' + type;
+        $('modal-emoji').textContent = emoji;
+        $('modal-h').textContent = title;
+        $('modal-body').innerHTML = html;
+        $('modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
 
-            if (isNaN(userAnswer) || userAnswer < 1 || userAnswer > 60) {
-                triggerDangerShock();
-                showModal('error', '⚠️', t.errorTitle, `
-                    <p style="text-align: center; color: #ff4444 !important;">${t.alertInvalid}</p>
-                `);
-                return;
-            }
-
-            if (userAnswer === SECRET_NUMBER) {
-                triggerOverload();
-            } else {
-                triggerDangerShock();
-                showModal('error', '❌', t.errorTitle, `
-                    <p style="text-align: center; color: #ff4444 !important;">${t.errorText1}</p>
-                    <p style="text-align: center; margin-top: 15px; color: #ff4444 !important;">${t.errorText2}</p>
-                    <p style="text-align: center; margin-top: 15px; color: #ff4444 !important;">${t.errorText3}</p>
-                `);
-            }
-        }
-        
-        function triggerDangerShock() {
-            document.body.classList.add('danger-shock');
-            setTimeout(() => {
-                document.body.classList.remove('danger-shock');
-            }, 800);
-        }
-        
-        function triggerOverload() {
-            const t = TRANSLATIONS[currentLang];
-            document.body.classList.add('overload');
-            
-            // Prima fase: overload crescente
-            setTimeout(() => {
-                document.body.classList.remove('overload');
-                document.body.classList.add('overload-flash');
-            }, 2000);
-            
-            // Flash finale e mostra risultato
-            setTimeout(() => {
-                document.body.classList.remove('overload-flash');
-                hasWon = true;
-                showModal('success', '', t.successTitle, `
-                    <p>${t.successText1} <strong>${SECRET_NUMBER}</strong>.</p>
-                    <p style="margin-top: 10px;">${t.successText2}</p>
-                    <p style="margin-top: 20px;">${t.successText3}</p>
-                    <ul style="list-style: none; padding: 15px 0;">
-                        <li>• ${currentLang === 'it' ? 'Cartella' : 'Folder'} 6 → 32 (2⁵)</li>
-                        <li>• ${currentLang === 'it' ? 'Cartella' : 'Folder'} 5 → 16 (2⁴)</li>
-                        <li>• ${currentLang === 'it' ? 'Cartella' : 'Folder'} 4 → 8 (2³)</li>
-                        <li>• ${currentLang === 'it' ? 'Cartella' : 'Folder'} 3 → 4 (2²)</li>
-                        <li>• ${currentLang === 'it' ? 'Cartella' : 'Folder'} 2 → 2 (2¹)</li>
-                        <li>• ${currentLang === 'it' ? 'Cartella' : 'Folder'} 1 → 1 (2⁰)</li>
-                    </ul>
-                    <p>${t.successText4}</p>
-                    <p style="margin-top: 10px;"><em>${t.successText5}</em></p>
-                    <div class="password-box">
-                        <p>${t.passwordLabel}</p>
-                        <strong>${RANDOM_PASSWORD}</strong>
-                    </div>
-                    <p>${t.successText6}<br>${t.successText7}</p>
-                `);
-            }, 2500);
-        }
-
-        function showModal(type, icon, title, text) {
-            modalContent.className = 'modal-content ' + type;
-            modalIcon.textContent = icon;
-            modalTitle.textContent = title;
-            modalText.innerHTML = text;
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function hideModal() {
-            modal.style.display = 'none';
+    function closeModal() {
+        if (hasWon) {
+            document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#050508;color:var(--cyan);font-family:'Outfit',sans-serif;text-align:center;padding:20px;">
+                <div style="font-size:3rem;margin-bottom:20px;">✓</div>
+                <h1 style="font-size:1.6rem;font-weight:800;color:#00ffd5;margin-bottom:12px;">COMPLETED</h1>
+                <p style="font-size:0.9rem;color:#4a5568;">You can close this page.</p>
+            </div>`;
+            setTimeout(() => window.close(), 1000);
+        } else {
+            $('modal').classList.remove('open');
             document.body.style.overflow = '';
         }
-        
-        // Variabile per tracciare se ha vinto
-        let hasWon = false;
-        
-        function hideModalAndClose() {
-            if (hasWon) {
-                // Mostra messaggio di chiusura
-                document.body.innerHTML = `
-                    <div style="
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        min-height: 100vh;
-                        background: #0a0a0f;
-                        color: #00ff88;
-                        font-family: 'Orbitron', sans-serif;
-                        text-align: center;
-                        padding: 20px;
-                    ">
-                        <h1 style="font-size: 2rem; margin-bottom: 20px;">✓ COMPLETATO</h1>
-                        <p style="font-size: 1.1rem; color: #888;">Puoi chiudere questa pagina.</p>
-                    </div>
-                `;
-                
-                // Prova a chiudere la finestra
-                setTimeout(() => {
-                    window.close();
-                    // Se non si chiude (restrizioni browser), rimane il messaggio
-                }, 1000);
-            } else {
-                modal.style.display = 'none';
-                document.body.style.overflow = '';
-            }
-        }
+    }
 
-        function init() {
-            updateProgressBar();
-            showPage(0);
-        }
+    // Events
+    navBtn.addEventListener('click', nextPage);
+    $('submit-btn').addEventListener('click', checkAnswer);
+    $('modal-close').addEventListener('click', closeModal);
+    $('modal').addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
+    answerInput.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); checkAnswer(); } });
 
-        navBtn.addEventListener('click', nextPage);
-        submitBtn.addEventListener('click', checkAnswer);
-        modalBtn.addEventListener('click', hideModalAndClose);
-        
-        // Language selector
-        langBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const newLang = btn.dataset.lang;
-                if (newLang !== currentLang) {
-                    currentLang = newLang;
-                    INTRO_PAGES = TRANSLATIONS[currentLang].pages;
-                    
-                    // Update active button
-                    langBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    
-                    // Refresh current page
-                    showPage(currentPage);
-                }
-            });
-        });
-        
-        // Cyberpunk Song Generator - Vera canzone con melodia, beat e struttura
-        const audioToggle = document.getElementById('audio-toggle');
-        const audioIcon = audioToggle.querySelector('.audio-icon');
-        let isPlaying = false;
-        let audioContext = null;
-        let masterGain = null;
-        let activeNodes = [];
-        let scheduledEvents = [];
-        let currentBeat = 0;
-        let bpm = 110;
-        
-        function createCyberpunkSong() {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            masterGain = audioContext.createGain();
-            masterGain.gain.value = 0.5;
-            masterGain.connect(audioContext.destination);
-            
-            const beatTime = 60 / bpm;
-            
-            // Melodie e progressioni
-            const bassPattern = [
-                55, 55, 55, 55, 55, 55, 55, 55,      // A
-                73.42, 73.42, 73.42, 73.42, 73.42, 73.42, 73.42, 73.42,  // D
-                65.41, 65.41, 65.41, 65.41, 65.41, 65.41, 65.41, 65.41,  // C
-                82.41, 82.41, 82.41, 82.41, 82.41, 82.41, 82.41, 82.41   // E
-            ];
-            
-            const melodyPattern = [
-                // Frase 1
-                { note: 440, duration: 0.5 },
-                { note: 0, duration: 0.25 },
-                { note: 523.25, duration: 0.25 },
-                { note: 587.33, duration: 0.5 },
-                { note: 523.25, duration: 0.25 },
-                { note: 440, duration: 0.25 },
-                { note: 392, duration: 0.75 },
-                { note: 0, duration: 0.25 },
-                // Frase 2
-                { note: 349.23, duration: 0.5 },
-                { note: 392, duration: 0.25 },
-                { note: 440, duration: 0.5 },
-                { note: 0, duration: 0.25 },
-                { note: 523.25, duration: 0.5 },
-                { note: 440, duration: 0.5 },
-                { note: 392, duration: 0.5 },
-                { note: 329.63, duration: 0.5 },
-                // Frase 3
-                { note: 440, duration: 0.25 },
-                { note: 523.25, duration: 0.25 },
-                { note: 587.33, duration: 0.25 },
-                { note: 659.25, duration: 0.75 },
-                { note: 587.33, duration: 0.5 },
-                { note: 523.25, duration: 0.5 },
-                { note: 440, duration: 0.5 },
-                { note: 0, duration: 0.5 },
-                // Frase 4
-                { note: 392, duration: 0.5 },
-                { note: 440, duration: 0.5 },
-                { note: 523.25, duration: 1 },
-                { note: 440, duration: 0.5 },
-                { note: 392, duration: 0.5 },
-                { note: 329.63, duration: 1 }
-            ];
-            
-            const arpPattern = [0, 4, 7, 12, 7, 4, 12, 7]; // Semitoni relativi alla root
-            
-            // === KICK DRUM ===
-            function playKick(time) {
-                const kick = audioContext.createOscillator();
-                const kickGain = audioContext.createGain();
-                const kickFilter = audioContext.createBiquadFilter();
-                
-                kick.type = 'sine';
-                kick.frequency.setValueAtTime(150, time);
-                kick.frequency.exponentialRampToValueAtTime(40, time + 0.1);
-                
-                kickFilter.type = 'lowpass';
-                kickFilter.frequency.value = 200;
-                
-                kickGain.gain.setValueAtTime(0.7, time);
-                kickGain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
-                
-                kick.connect(kickFilter);
-                kickFilter.connect(kickGain);
-                kickGain.connect(masterGain);
-                
-                kick.start(time);
-                kick.stop(time + 0.3);
-            }
-            
-            // === SNARE ===
-            function playSnare(time) {
-                // Noise part
-                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.2, audioContext.sampleRate);
-                const noiseData = noiseBuffer.getChannelData(0);
-                for (let i = 0; i < noiseBuffer.length; i++) {
-                    noiseData[i] = Math.random() * 2 - 1;
-                }
-                
-                const noise = audioContext.createBufferSource();
-                noise.buffer = noiseBuffer;
-                
-                const noiseGain = audioContext.createGain();
-                const noiseFilter = audioContext.createBiquadFilter();
-                
-                noiseFilter.type = 'highpass';
-                noiseFilter.frequency.value = 1000;
-                
-                noiseGain.gain.setValueAtTime(0.3, time);
-                noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
-                
-                noise.connect(noiseFilter);
-                noiseFilter.connect(noiseGain);
-                noiseGain.connect(masterGain);
-                
-                noise.start(time);
-                
-                // Body
-                const body = audioContext.createOscillator();
-                const bodyGain = audioContext.createGain();
-                body.type = 'triangle';
-                body.frequency.setValueAtTime(200, time);
-                body.frequency.exponentialRampToValueAtTime(80, time + 0.05);
-                bodyGain.gain.setValueAtTime(0.3, time);
-                bodyGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-                body.connect(bodyGain);
-                bodyGain.connect(masterGain);
-                body.start(time);
-                body.stop(time + 0.15);
-            }
-            
-            // === HI-HAT ===
-            function playHihat(time, open = false) {
-                const duration = open ? 0.15 : 0.05;
-                const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * duration, audioContext.sampleRate);
-                const noiseData = noiseBuffer.getChannelData(0);
-                for (let i = 0; i < noiseBuffer.length; i++) {
-                    noiseData[i] = Math.random() * 2 - 1;
-                }
-                
-                const noise = audioContext.createBufferSource();
-                noise.buffer = noiseBuffer;
-                
-                const noiseGain = audioContext.createGain();
-                const noiseFilter = audioContext.createBiquadFilter();
-                
-                noiseFilter.type = 'highpass';
-                noiseFilter.frequency.value = 7000;
-                
-                noiseGain.gain.setValueAtTime(open ? 0.12 : 0.08, time);
-                noiseGain.gain.exponentialRampToValueAtTime(0.01, time + duration);
-                
-                noise.connect(noiseFilter);
-                noiseFilter.connect(noiseGain);
-                noiseGain.connect(masterGain);
-                
-                noise.start(time);
-            }
-            
-            // === BASS SYNTH ===
-            function playBass(time, freq, duration) {
-                const bass1 = audioContext.createOscillator();
-                const bass2 = audioContext.createOscillator();
-                const bassGain = audioContext.createGain();
-                const bassFilter = audioContext.createBiquadFilter();
-                
-                bass1.type = 'sawtooth';
-                bass2.type = 'square';
-                bass1.frequency.value = freq;
-                bass2.frequency.value = freq * 1.005; // Slight detune
-                
-                bassFilter.type = 'lowpass';
-                bassFilter.frequency.setValueAtTime(300, time);
-                bassFilter.frequency.linearRampToValueAtTime(800, time + 0.05);
-                bassFilter.frequency.linearRampToValueAtTime(400, time + duration);
-                bassFilter.Q.value = 3;
-                
-                bassGain.gain.setValueAtTime(0.2, time);
-                bassGain.gain.setValueAtTime(0.2, time + duration - 0.05);
-                bassGain.gain.linearRampToValueAtTime(0, time + duration);
-                
-                bass1.connect(bassFilter);
-                bass2.connect(bassFilter);
-                bassFilter.connect(bassGain);
-                bassGain.connect(masterGain);
-                
-                bass1.start(time);
-                bass2.start(time);
-                bass1.stop(time + duration);
-                bass2.stop(time + duration);
-            }
-            
-            // === LEAD SYNTH ===
-            function playLead(time, freq, duration) {
-                if (freq === 0) return;
-                
-                const lead1 = audioContext.createOscillator();
-                const lead2 = audioContext.createOscillator();
-                const leadGain = audioContext.createGain();
-                const leadFilter = audioContext.createBiquadFilter();
-                const delay = audioContext.createDelay();
-                const delayGain = audioContext.createGain();
-                
-                lead1.type = 'sawtooth';
-                lead2.type = 'square';
-                lead1.frequency.value = freq;
-                lead2.frequency.value = freq * 2.01; // Octave up + detune
-                
-                leadFilter.type = 'lowpass';
-                leadFilter.frequency.setValueAtTime(2000, time);
-                leadFilter.frequency.linearRampToValueAtTime(1200, time + duration);
-                leadFilter.Q.value = 2;
-                
-                leadGain.gain.setValueAtTime(0, time);
-                leadGain.gain.linearRampToValueAtTime(0.12, time + 0.02);
-                leadGain.gain.setValueAtTime(0.1, time + duration - 0.05);
-                leadGain.gain.linearRampToValueAtTime(0, time + duration);
-                
-                delay.delayTime.value = beatTime * 0.375;
-                delayGain.gain.value = 0.3;
-                
-                lead1.connect(leadFilter);
-                lead2.connect(leadFilter);
-                leadFilter.connect(leadGain);
-                leadGain.connect(masterGain);
-                leadGain.connect(delay);
-                delay.connect(delayGain);
-                delayGain.connect(masterGain);
-                
-                lead1.start(time);
-                lead2.start(time);
-                lead1.stop(time + duration + 0.5);
-                lead2.stop(time + duration + 0.5);
-            }
-            
-            // === ARP SYNTH ===
-            function playArp(time, rootFreq, semitones) {
-                const freq = rootFreq * Math.pow(2, semitones / 12);
-                
-                const arp = audioContext.createOscillator();
-                const arpGain = audioContext.createGain();
-                const arpFilter = audioContext.createBiquadFilter();
-                
-                arp.type = 'square';
-                arp.frequency.value = freq * 2;
-                
-                arpFilter.type = 'lowpass';
-                arpFilter.frequency.value = 3000;
-                arpFilter.Q.value = 5;
-                
-                arpGain.gain.setValueAtTime(0.06, time);
-                arpGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-                
-                arp.connect(arpFilter);
-                arpFilter.connect(arpGain);
-                arpGain.connect(masterGain);
-                
-                arp.start(time);
-                arp.stop(time + 0.15);
-            }
-            
-            // === PAD ===
-            const padOsc1 = audioContext.createOscillator();
-            const padOsc2 = audioContext.createOscillator();
-            const padOsc3 = audioContext.createOscillator();
-            const padGain = audioContext.createGain();
-            const padFilter = audioContext.createBiquadFilter();
-            
-            padOsc1.type = 'sine';
-            padOsc2.type = 'sine';
-            padOsc3.type = 'sine';
-            padOsc1.frequency.value = 220;
-            padOsc2.frequency.value = 277.18;
-            padOsc3.frequency.value = 329.63;
-            
-            padFilter.type = 'lowpass';
-            padFilter.frequency.value = 800;
-            
-            padGain.gain.value = 0.06;
-            
-            padOsc1.connect(padFilter);
-            padOsc2.connect(padFilter);
-            padOsc3.connect(padFilter);
-            padFilter.connect(padGain);
-            padGain.connect(masterGain);
-            
-            padOsc1.start();
-            padOsc2.start();
-            padOsc3.start();
-            activeNodes.push(padOsc1, padOsc2, padOsc3);
-            
-            // Chord changes per il pad
-            const chords = [
-                [220, 277.18, 329.63],     // Am
-                [293.66, 369.99, 440],     // D
-                [261.63, 329.63, 392],     // C
-                [329.63, 415.30, 493.88]   // E
-            ];
-            let currentChord = 0;
-            
-            // === MAIN SEQUENCER ===
-            let melodyIndex = 0;
-            let melodyTime = 0;
-            
-            function scheduleNotes() {
-                const currentTime = audioContext.currentTime;
-                const scheduleAhead = 0.2;
-                
-                while (currentBeat < 10000) {
-                    const beatStartTime = currentBeat * (beatTime / 2);
-                    
-                    if (beatStartTime > currentTime + scheduleAhead) break;
-                    
-                    if (beatStartTime >= currentTime) {
-                        const bar = Math.floor(currentBeat / 16);
-                        const beatInBar = currentBeat % 16;
-                        const section = Math.floor(bar / 4) % 4;
-                        
-                        // Kick: 4 on the floor (ogni 4 mezzi-beat = ogni beat)
-                        if (beatInBar % 4 === 0) {
-                            playKick(beatStartTime);
-                        }
-                        
-                        // Snare: beat 2 e 4
-                        if (beatInBar === 4 || beatInBar === 12) {
-                            playSnare(beatStartTime);
-                        }
-                        
-                        // Hi-hat: ogni mezzo beat
-                        playHihat(beatStartTime, beatInBar % 4 === 2);
-                        
-                        // Bass: ogni beat
-                        if (beatInBar % 4 === 0) {
-                            const bassNote = bassPattern[(bar * 4 + beatInBar / 4) % bassPattern.length];
-                            playBass(beatStartTime, bassNote, beatTime * 0.9);
-                        }
-                        
-                        // Arpeggio: ogni mezzo beat durante la sezione 1 e 3
-                        if (section === 1 || section === 3) {
-                            const rootFreq = bassPattern[(bar * 4) % bassPattern.length] * 2;
-                            const arpNote = arpPattern[beatInBar % arpPattern.length];
-                            playArp(beatStartTime, rootFreq, arpNote);
-                        }
-                        
-                        // Melodia: durante sezione 2 e 3
-                        if ((section === 2 || section === 3) && beatInBar === 0) {
-                            let timeOffset = 0;
-                            for (let i = 0; i < 8 && melodyIndex + i < melodyPattern.length; i++) {
-                                const m = melodyPattern[(melodyIndex + i) % melodyPattern.length];
-                                playLead(beatStartTime + timeOffset, m.note, m.duration * beatTime);
-                                timeOffset += m.duration * beatTime;
-                            }
-                            melodyIndex = (melodyIndex + 8) % melodyPattern.length;
-                        }
-                        
-                        // Cambio accordi pad ogni 4 bar
-                        if (beatInBar === 0 && bar % 4 === 0) {
-                            currentChord = (currentChord + 1) % chords.length;
-                            const chord = chords[currentChord];
-                            padOsc1.frequency.setTargetAtTime(chord[0], beatStartTime, 0.5);
-                            padOsc2.frequency.setTargetAtTime(chord[1], beatStartTime, 0.5);
-                            padOsc3.frequency.setTargetAtTime(chord[2], beatStartTime, 0.5);
-                        }
-                    }
-                    
-                    currentBeat++;
-                }
-                
-                const scheduleInterval = setTimeout(scheduleNotes, 100);
-                scheduledEvents.push(scheduleInterval);
-            }
-            
-            scheduleNotes();
-        }
-        
-        function stopCyberpunkSong() {
-            scheduledEvents.forEach(id => {
-                clearTimeout(id);
-                clearInterval(id);
-            });
-            scheduledEvents = [];
-            
-            activeNodes.forEach(node => {
-                try { node.stop(); } catch(e) {}
-            });
-            activeNodes = [];
-            
-            if (audioContext) {
-                audioContext.close();
-                audioContext = null;
-            }
-            
-            currentBeat = 0;
-        }
-        
-        audioToggle.addEventListener('click', async () => {
-            if (isPlaying) {
-                stopCyberpunkSong();
-                audioIcon.textContent = '🔇';
-                audioToggle.classList.remove('playing');
-                isPlaying = false;
-            } else {
-                try {
-                    createCyberpunkSong();
-                    audioIcon.textContent = '🔊';
-                    audioToggle.classList.add('playing');
-                    isPlaying = true;
-                } catch (err) {
-                    console.log('Errore audio:', err);
-                }
-            }
-        });
-        answerInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                checkAnswer();
-            }
-        });
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) hideModal();
-        });
+    // Prevent double-tap zoom
+    document.addEventListener('touchend', e => {
+        const now = Date.now();
+        if (now - (document.lastTE || 0) < 300) e.preventDefault();
+        document.lastTE = now;
+    }, { passive: false });
 
-        // Prevent zoom on double tap
-        document.addEventListener('touchend', (e) => {
-            const now = Date.now();
-            if (now - (document.lastTouchEnd || 0) < 300) {
-                e.preventDefault();
-            }
-            document.lastTouchEnd = now;
-        }, { passive: false });
-        
-        // ═══════════════════════════════════════════════════════════════════════════
-        // FULLSCREEN & PWA SUPPORT
-        // ═══════════════════════════════════════════════════════════════════════════
-        
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
-        const installPrompt = document.getElementById('install-prompt');
-        const installBtn = document.getElementById('install-btn');
-        const closePromptBtn = document.getElementById('close-prompt');
-        let deferredPrompt = null;
-        
-        // Verifica se è già in modalità standalone (PWA installata)
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                            window.navigator.standalone || 
-                            document.referrer.includes('android-app://');
-        
-        // Nascondi il pulsante fullscreen se già in standalone
-        if (isStandalone) {
-            fullscreenBtn.classList.add('hidden');
-        }
-        
-        // Fullscreen toggle
-        function toggleFullscreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                // Entra in fullscreen
-                const elem = document.documentElement;
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                } else if (elem.webkitRequestFullscreen) {
-                    elem.webkitRequestFullscreen();
-                } else if (elem.mozRequestFullScreen) {
-                    elem.mozRequestFullScreen();
-                } else if (elem.msRequestFullscreen) {
-                    elem.msRequestFullscreen();
-                }
-                fullscreenBtn.innerHTML = '<span>✕</span><span>ESCI</span>';
-            } else {
-                // Esci da fullscreen
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-                fullscreenBtn.innerHTML = '<span>⛶</span><span>FULLSCREEN</span>';
-            }
-        }
-        
-        fullscreenBtn.addEventListener('click', toggleFullscreen);
-        
-        // Aggiorna pulsante quando cambia lo stato fullscreen
-        document.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                fullscreenBtn.innerHTML = '<span>✕</span><span>ESCI</span>';
-            } else {
-                fullscreenBtn.innerHTML = '<span>⛶</span><span>FULLSCREEN</span>';
-            }
-        });
-        
-        document.addEventListener('webkitfullscreenchange', () => {
-            if (document.webkitFullscreenElement) {
-                fullscreenBtn.innerHTML = '<span>✕</span><span>ESCI</span>';
-            } else {
-                fullscreenBtn.innerHTML = '<span>⛶</span><span>FULLSCREEN</span>';
-            }
-        });
-        
-        // PWA Install prompt
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // Mostra il prompt dopo 3 secondi se non è già installata
-            setTimeout(() => {
-                if (!isStandalone && deferredPrompt) {
-                    installPrompt.classList.add('show');
-                }
-            }, 3000);
-        });
-        
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installPrompt.classList.remove('show');
-                }
-                deferredPrompt = null;
-            }
-        });
-        
-        closePromptBtn.addEventListener('click', () => {
-            installPrompt.classList.remove('show');
-        });
-        
-        // Nascondi prompt su iOS (deve usare "Aggiungi a Home" manualmente)
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        if (isIOS && !isStandalone) {
-            // Su iOS mostra istruzioni diverse dopo 5 secondi
-            setTimeout(() => {
-                installPrompt.querySelector('p').innerHTML = '📱 Tocca <strong>Condividi</strong> → <strong>Aggiungi a Home</strong> per un\'esperienza senza barra!';
-                installPrompt.querySelector('.install-btn').style.display = 'none';
-                installPrompt.classList.add('show');
-            }, 5000);
-        }
+    // ═══════════════════════════════════════
+    // FULLSCREEN
+    // ═══════════════════════════════════════
+    const fsBtn = $('fs-btn');
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isStandalone) fsBtn.style.display = 'none';
 
-        // Electric cursor trail effect
-        let lastSparkTime = 0;
-        let sparkCounter = 0;
-        
-        function createElectricSpark(x, y) {
-            // Main spark
-            const spark = document.createElement('div');
-            spark.className = 'electric-spark' + (Math.random() > 0.5 ? ' alt' : '');
-            spark.style.left = (x + (Math.random() - 0.5) * 20) + 'px';
-            spark.style.top = (y + (Math.random() - 0.5) * 20) + 'px';
-            document.body.appendChild(spark);
-            
-            // Remove after animation
-            setTimeout(() => spark.remove(), 600);
-            
-            // Occasionally add lightning bolt symbol
-            if (Math.random() > 0.7) {
-                const bolt = document.createElement('div');
-                bolt.className = 'lightning-bolt';
-                bolt.innerHTML = '⚡';
-                bolt.style.left = (x + (Math.random() - 0.5) * 40) + 'px';
-                bolt.style.top = (y + (Math.random() - 0.5) * 40) + 'px';
-                document.body.appendChild(bolt);
-                setTimeout(() => bolt.remove(), 400);
-            }
+    fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            const el = document.documentElement;
+            (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen).call(el);
+            fsBtn.textContent = '✕';
+        } else {
+            (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen).call(document);
+            fsBtn.textContent = '⛶';
         }
-        
-        // Mouse move handler
-        document.addEventListener('mousemove', (e) => {
-            const now = Date.now();
-            // Create spark every 50ms while moving
-            if (now - lastSparkTime > 50) {
-                createElectricSpark(e.clientX, e.clientY);
-                lastSparkTime = now;
-            }
-        });
-        
-        // Touch move handler for mobile
-        document.addEventListener('touchmove', (e) => {
-            const now = Date.now();
-            if (now - lastSparkTime > 50 && e.touches.length > 0) {
-                const touch = e.touches[0];
-                createElectricSpark(touch.clientX, touch.clientY);
-                lastSparkTime = now;
-            }
-        }, { passive: true });
+    });
+    document.addEventListener('fullscreenchange', () => { fsBtn.textContent = document.fullscreenElement ? '✕' : '⛶'; });
 
-        init();
+    // ═══════════════════════════════════════
+    // PWA
+    // ═══════════════════════════════════════
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault(); deferredPrompt = e;
+        setTimeout(() => { if (!isStandalone && deferredPrompt) $('install-prompt').style.display = 'block'; }, 4000);
+    });
+    $('install-btn')?.addEventListener('click', async () => {
+        if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') $('install-prompt').style.display = 'none'; deferredPrompt = null; }
+    });
+    $('close-prompt')?.addEventListener('click', () => { $('install-prompt').style.display = 'none'; });
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !isStandalone) {
+        setTimeout(() => {
+            $('install-prompt').querySelector('p').innerHTML = '📱 Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>';
+            $('install-btn').style.display = 'none';
+            $('install-prompt').style.display = 'block';
+        }, 5000);
+    }
+
+    // ═══════════════════════════════════════
+    // AUDIO ENGINE (same synth, cleaner code)
+    // ═══════════════════════════════════════
+    const audioBtn = $('audio-btn');
+    let playing = false, actx = null, mgain = null, nodes = [], timers = [], beat = 0;
+
+    function startAudio() {
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+        mgain = actx.createGain(); mgain.gain.value = 0.4; mgain.connect(actx.destination);
+        const bt = 60 / 110;
+        const bass = [55,55,55,55,55,55,55,55,73.42,73.42,73.42,73.42,73.42,73.42,73.42,73.42,65.41,65.41,65.41,65.41,65.41,65.41,65.41,65.41,82.41,82.41,82.41,82.41,82.41,82.41,82.41,82.41];
+        const melody = [{n:440,d:.5},{n:0,d:.25},{n:523.25,d:.25},{n:587.33,d:.5},{n:523.25,d:.25},{n:440,d:.25},{n:392,d:.75},{n:0,d:.25},{n:349.23,d:.5},{n:392,d:.25},{n:440,d:.5},{n:0,d:.25},{n:523.25,d:.5},{n:440,d:.5},{n:392,d:.5},{n:329.63,d:.5},{n:440,d:.25},{n:523.25,d:.25},{n:587.33,d:.25},{n:659.25,d:.75},{n:587.33,d:.5},{n:523.25,d:.5},{n:440,d:.5},{n:0,d:.5},{n:392,d:.5},{n:440,d:.5},{n:523.25,d:1},{n:440,d:.5},{n:392,d:.5},{n:329.63,d:1}];
+        const arp = [0,4,7,12,7,4,12,7];
+
+        const mk = (type, freq, t, dur, vol, fType, fFreq) => {
+            const o = actx.createOscillator(), g = actx.createGain();
+            o.type = type; o.frequency.value = freq;
+            g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+            if (fType) { const f = actx.createBiquadFilter(); f.type = fType; f.frequency.value = fFreq; o.connect(f); f.connect(g); } else { o.connect(g); }
+            g.connect(mgain); o.start(t); o.stop(t + dur);
+        };
+        const noise = (t, dur, hp, vol) => {
+            const buf = actx.createBuffer(1, actx.sampleRate * dur, actx.sampleRate), d = buf.getChannelData(0);
+            for (let i = 0; i < buf.length; i++) d[i] = Math.random() * 2 - 1;
+            const s = actx.createBufferSource(), g = actx.createGain(), f = actx.createBiquadFilter();
+            s.buffer = buf; f.type = 'highpass'; f.frequency.value = hp;
+            g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+            s.connect(f); f.connect(g); g.connect(mgain); s.start(t);
+        };
+
+        // Pad
+        const p1 = actx.createOscillator(), p2 = actx.createOscillator(), p3 = actx.createOscillator();
+        const pg = actx.createGain(), pf = actx.createBiquadFilter();
+        [p1, p2, p3].forEach(o => { o.type = 'sine'; o.connect(pf); });
+        p1.frequency.value = 220; p2.frequency.value = 277.18; p3.frequency.value = 329.63;
+        pf.type = 'lowpass'; pf.frequency.value = 600; pg.gain.value = 0.05;
+        pf.connect(pg); pg.connect(mgain);
+        p1.start(); p2.start(); p3.start();
+        nodes.push(p1, p2, p3);
+
+        const chords = [[220,277.18,329.63],[293.66,369.99,440],[261.63,329.63,392],[329.63,415.30,493.88]];
+        let cc = 0, mi = 0;
+
+        function schedule() {
+            const ct = actx.currentTime;
+            while (beat < 10000) {
+                const t = beat * (bt / 2);
+                if (t > ct + 0.2) break;
+                if (t >= ct) {
+                    const bar = Math.floor(beat / 16), bib = beat % 16, sec = Math.floor(bar / 4) % 4;
+                    if (bib % 4 === 0) { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.1); g.gain.setValueAtTime(0.6, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.3); o.connect(g); g.connect(mgain); o.start(t); o.stop(t + 0.3); }
+                    if (bib === 4 || bib === 12) { noise(t, 0.15, 1000, 0.25); mk('triangle', 200, t, 0.1, 0.25); }
+                    noise(t, bib % 4 === 2 ? 0.12 : 0.04, 7000, bib % 4 === 2 ? 0.1 : 0.06);
+                    if (bib % 4 === 0) { const f = bass[(bar * 4 + bib / 4) % bass.length]; mk('sawtooth', f, t, bt * 0.85, 0.15, 'lowpass', 400); }
+                    if (sec === 1 || sec === 3) { const rf = bass[(bar * 4) % bass.length] * 2, sf = rf * Math.pow(2, arp[bib % 8] / 12); mk('square', sf * 2, t, 0.1, 0.04, 'lowpass', 3000); }
+                    if ((sec === 2 || sec === 3) && bib === 0) { let off = 0; for (let i = 0; i < 8; i++) { const m = melody[(mi + i) % melody.length]; if (m.n > 0) mk('sawtooth', m.n, t + off, m.d * bt * 0.9, 0.08, 'lowpass', 1800); off += m.d * bt; } mi = (mi + 8) % melody.length; }
+                    if (bib === 0 && bar % 4 === 0) { cc = (cc + 1) % chords.length; const ch = chords[cc]; p1.frequency.setTargetAtTime(ch[0], t, 0.5); p2.frequency.setTargetAtTime(ch[1], t, 0.5); p3.frequency.setTargetAtTime(ch[2], t, 0.5); }
+                }
+                beat++;
+            }
+            timers.push(setTimeout(schedule, 100));
+        }
+        schedule();
+    }
+
+    function stopAudio() {
+        timers.forEach(clearTimeout); timers = [];
+        nodes.forEach(n => { try { n.stop(); } catch (e) {} }); nodes = [];
+        if (actx) { actx.close(); actx = null; } beat = 0;
+    }
+
+    audioBtn.addEventListener('click', () => {
+        if (playing) { stopAudio(); audioBtn.textContent = '🔇'; audioBtn.classList.remove('active'); }
+        else { try { startAudio(); audioBtn.textContent = '🔊'; audioBtn.classList.add('active'); } catch (e) {} }
+        playing = !playing;
+    });
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    showPage(0);
     </script>
 </body>
 </html>
