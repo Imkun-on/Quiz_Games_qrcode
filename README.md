@@ -20,7 +20,7 @@
 
 ### 📲 Scan to Play
 
-<img src="./qr-code.jpg" alt="Scan to play Enigma #1" width="250"/>
+<img src="./qr_code_enigma_1.jpg" alt="Scan to play Enigma #1" width="250"/>
 
 *Scan the QR code to start the adventure*
 
