@@ -14,10 +14,6 @@
 
 <br/>
 
-🇮🇹 **Italiano** | 🇬🇧 **English**
-
-<br/>
-
 ### 📲 Scan to Play
 
 <img src="./qr_code_enigma_1.jpg" alt="Scan to play Enigma #1" width="250"/>
@@ -41,10 +37,9 @@ The system generates a **random secret number** (from 1 to 60), hides it within 
 | Feature | Description |
 |:---|:---|
 | 🧩 **Binary Riddle** | Puzzle based on decomposition into powers of 2 |
-| 🌐 **Bilingual** | Full Italian / English support with real-time switch |
 | 🎵 **Generative Music** | Cyberpunk soundtrack generated via Web Audio API (zero external files) |
 | 📱 **PWA Ready** | Installable as an app, fullscreen support, safe-area for iOS notch |
-| ⚡ **Cyberpunk Effects** | Glitch, neon trail, particles, scan lines, electric shocks |
+| ⚡ **Cinematic Effects** | Interactive particle field, grain overlay, vignette, HUD corners, scan lines |
 | 🔐 **Dynamic Password** | Each playthrough generates a unique password to unlock the next riddle |
 | 🎨 **Zero Dependencies** | Single HTML file, no frameworks, no external assets (only Google Fonts) |
 
@@ -60,7 +55,7 @@ The system generates a **random secret number** (from 1 to 60), hides it within 
 ```
 
 1. **Scan** the QR code hidden in the real world
-2. **Read** the narrative introduction (13 pages with cyberpunk effects)
+2. **Read** the narrative introduction (13 pages with cinematic transitions)
 3. **Explore** the 6 folders — each one tells you if the secret number is present or not
 4. **Calculate** the number by summing the first value of each "correct" folder
 5. **Enter** the answer and receive the **password** for the next riddle
@@ -93,28 +88,28 @@ enigma-1/
 │
 ├── Internal structure:
 │   ├── HTML            → Semantic structure, inline PWA manifest
-│   ├── CSS             → 800+ lines, pure CSS animations, responsive
-│   ├── JavaScript      → Game logic, Web Audio API, sequencer
-│   └── SVG             → Inline PWA icon (data URI)
+│   ├── CSS             → Glassmorphism panels, CSS animations, responsive
+│   ├── JavaScript      → Game logic, Canvas particles, Web Audio API sequencer
+│   └── Canvas          → Interactive particle field with mouse/touch reactivity
 │
 └── External dependencies:
-    └── Google Fonts    → Orbitron + Rajdhani
+    └── Google Fonts    → Outfit + Space Grotesk + Syne Mono
 ```
 
-### Visual Effects (CSS only)
-- Animated perspective grid
-- Scan lines with flicker
-- Moving neon lines
-- Floating particles
-- Periodic glitch overlay
-- Electric cursor trail (JS + CSS)
-- Electric shock on selection/error
-- "Overload" effect on victory
+### Visual Effects
+- Interactive particle field with connections (Canvas 2D)
+- Noise grain overlay with animated shift
+- Cinematic vignette & subtle scan lines
+- HUD corner markers (sci-fi frame)
+- Glassmorphism panels with backdrop-filter
+- Card selection flash with glow accents
+- "Overload" effect with screen flash on victory
+- Danger shake with red flash on wrong answer
 
 ### Audio (Web Audio API)
 - Synthesized **Kick**, **Snare**, **Hi-Hat**
 - **Bass** with resonant filter
-- **Lead synth** with delay
+- **Lead synth** with sawtooth wave
 - **Arpeggiator** with semitone pattern
 - **Pad** with chord changes (Am → D → C → E)
 - **Sequencer** at 110 BPM with section structure
@@ -159,10 +154,11 @@ Upload the file to any static hosting (GitHub Pages, Netlify, Vercel) and genera
 | Parameter | Where | Default |
 |:---|:---|:---|
 | Number range | `Math.floor(Math.random() * 60) + 1` | 1–60 |
-| Music BPM | `let bpm = 110` | 110 |
-| Theme colors | CSS variables `:root` | Neon green / Pink / Blue |
-| Intro texts | `TRANSLATIONS` object | IT + EN |
+| Music BPM | `60 / 110` in audio engine | 110 |
+| Theme colors | CSS variables `:root` | Cyan / Magenta / Violet |
+| Intro texts | `PAGES` array | English |
 | Password prefix | `'ENIGMA2-'` | ENIGMA2- |
+| Particle count | `for (let i = 0; i < 80; i++)` | 80 |
 
 ---
 
