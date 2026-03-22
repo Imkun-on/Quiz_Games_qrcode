@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="Enigma #1 — Un gioco di ruolo nel mondo reale. Risolvi l'enigma binario e ottieni la password per il prossimo livello.">
+    <meta property="og:title" content="Enigma #1 — Cyberpunk Riddle Game">
+    <meta property="og:description" content="Scansiona il QR code, entra nel gioco e risolvi l'enigma nascosto.">
+    <meta property="og:type" content="website">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Enigma #1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#050508">
-    <title>🎯 Enigma #1</title>
+    <title>Enigma #1</title>
     <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;Enigma Game - Riddle 1&quot;,&quot;short_name&quot;:&quot;Enigma 1&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;fullscreen&quot;,&quot;orientation&quot;:&quot;portrait&quot;,&quot;background_color&quot;:&quot;#050508&quot;,&quot;theme_color&quot;:&quot;#050508&quot;}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -40,6 +46,49 @@
             min-height: 100vh; min-height: 100dvh;
             -webkit-font-smoothing: antialiased;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        /* === SPLASH SCREEN === */
+        .splash {
+            position: fixed; inset: 0; z-index: 10000;
+            background: var(--bg);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .splash-logo {
+            font-family: 'Outfit', sans-serif; font-weight: 900;
+            font-size: clamp(3rem, 12vw, 5rem); letter-spacing: -0.04em;
+            background: linear-gradient(135deg, var(--cyan) 0%, #fff 40%, var(--magenta) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            filter: drop-shadow(0 0 40px rgba(0,255,213,0.4));
+            opacity: 0; transform: scale(0.5);
+            animation: splashIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) 0.3s forwards;
+        }
+        .splash-sub {
+            font-family: 'Syne Mono', monospace; font-size: 0.7rem;
+            letter-spacing: 6px; text-transform: uppercase; color: var(--text-dim);
+            opacity: 0; animation: splashFade 1s ease 1s forwards;
+        }
+        .splash-bar {
+            width: 120px; height: 2px; margin-top: 32px;
+            background: rgba(255,255,255,0.05); border-radius: 1px; overflow: hidden;
+        }
+        .splash-bar-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--cyan), var(--violet));
+            animation: splashLoad 2s ease-in-out 0.5s forwards;
+            box-shadow: 0 0 12px var(--cyan);
+        }
+        @keyframes splashIn {
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes splashFade {
+            to { opacity: 0.6; }
+        }
+        @keyframes splashLoad {
+            to { width: 100%; }
         }
 
         /* === CANVAS BACKGROUND === */
@@ -124,8 +173,39 @@
         .icon-btn:active { transform: scale(0.9); }
         .icon-btn.active { border-color: var(--cyan); color: var(--cyan); box-shadow: var(--glow-cyan); }
 
+        /* === ATTEMPT COUNTER === */
+        .attempts-badge {
+            position: fixed; bottom: 20px; left: 20px; z-index: 200;
+            font-family: 'Syne Mono', monospace; font-size: 0.6rem;
+            letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim);
+            background: rgba(10,10,16,0.9); border: 1px solid var(--border);
+            padding: 8px 14px; border-radius: 20px; backdrop-filter: blur(10px);
+            display: none; transition: all 0.3s ease;
+        }
+        .attempts-badge.visible { display: block; }
+        .attempts-badge .count { color: var(--magenta); font-weight: 700; }
+
+        /* === TOAST === */
+        .toast {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px);
+            z-index: 2000; padding: 14px 24px; border-radius: 12px;
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 500;
+            backdrop-filter: blur(20px); pointer-events: none;
+            opacity: 0; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            max-width: 90%; text-align: center; white-space: nowrap;
+        }
+        .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error {
+            background: rgba(255, 45, 120, 0.15); border: 1px solid rgba(255, 45, 120, 0.3);
+            color: var(--magenta);
+        }
+        .toast.success {
+            background: rgba(0, 255, 213, 0.15); border: 1px solid rgba(0, 255, 213, 0.3);
+            color: var(--cyan);
+        }
+
         /* === MAIN CONTAINER === */
-        .main {
+        main {
             position: relative; z-index: 10; min-height: 100vh; min-height: 100dvh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 80px 20px 40px;
@@ -158,14 +238,15 @@
 
         /* === PAGE INDICATOR === */
         .page-indicator {
-            display: flex; gap: 6px; justify-content: center; margin-bottom: 32px;
-            align-self: center;
+            display: flex; gap: 4px; justify-content: center; margin-bottom: 32px;
+            align-self: center; flex-wrap: wrap; max-width: 100%; padding: 0 8px;
         }
         .page-dot {
-            width: 24px; height: 2px; border-radius: 1px;
+            width: 18px; height: 3px; border-radius: 2px;
             background: var(--text-dim); opacity: 0.3; transition: all 0.5s ease;
+            flex-shrink: 0;
         }
-        .page-dot.active { background: var(--cyan); opacity: 1; width: 40px; box-shadow: 0 0 10px var(--cyan); }
+        .page-dot.active { background: var(--cyan); opacity: 1; width: 32px; box-shadow: 0 0 10px var(--cyan); }
         .page-dot.done { background: var(--cyan); opacity: 0.5; }
 
         /* === TEXT DISPLAY === */
@@ -218,8 +299,8 @@
             transition: all 0.5s ease;
         }
         .riddle-label.visible { display: block; opacity: 0.6; }
-        .riddle-label::before, .riddle-label::after { content: '───  '; }
-        .riddle-label::after { content: '  ───'; }
+        .riddle-label::before, .riddle-label::after { content: '---  '; }
+        .riddle-label::after { content: '  ---'; }
 
         /* === PROGRESS === */
         .progress-track {
@@ -242,7 +323,7 @@
             color: var(--bg); background: var(--cyan); position: relative; overflow: hidden;
             transition: all 0.3s ease; touch-action: manipulation;
             box-shadow: 0 0 30px rgba(0,255,213,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-            align-self: flex-end;
+            align-self: center; width: 100%; max-width: 320px;
         }
         .nav-btn::before {
             content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
@@ -257,12 +338,20 @@
             padding: 20px 64px; font-size: 0.95rem;
             box-shadow: 0 0 40px rgba(0,255,213,0.4), 0 0 80px rgba(139,92,246,0.2);
             animation: btnGlow 3s ease-in-out infinite;
-            align-self: center;
         }
         @keyframes btnGlow {
             0%, 100% { box-shadow: 0 0 30px rgba(0,255,213,0.3), 0 0 60px rgba(139,92,246,0.15); }
             50% { box-shadow: 0 0 50px rgba(0,255,213,0.5), 0 0 100px rgba(139,92,246,0.3); }
         }
+
+        /* === SWIPE HINT === */
+        .swipe-hint {
+            font-family: 'Syne Mono', monospace; font-size: 0.6rem;
+            letter-spacing: 2px; color: var(--text-dim); opacity: 0.4;
+            text-align: center; margin-top: 16px;
+            animation: swipeHintPulse 2s ease-in-out infinite;
+        }
+        @keyframes swipeHintPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.2; } }
 
         /* === CARDS === */
         .cards-wrapper {
@@ -360,7 +449,8 @@
         .answer-bar {
             background: linear-gradient(145deg, rgba(10,10,16,0.95), rgba(5,5,8,0.98));
             border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 28px 24px; text-align: center; backdrop-filter: blur(20px);
+            padding: 28px 24px; padding-bottom: calc(28px + env(safe-area-inset-bottom));
+            text-align: center; backdrop-filter: blur(20px);
             position: sticky; bottom: 10px; z-index: 50;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
@@ -379,6 +469,18 @@
         }
         .answer-input::-webkit-inner-spin-button, .answer-input::-webkit-outer-spin-button { -webkit-appearance: none; }
         .answer-input:focus { border-color: var(--cyan); box-shadow: var(--glow-cyan); }
+        .answer-input.shake {
+            animation: inputShake 0.5s ease-out;
+            border-color: var(--magenta) !important;
+            box-shadow: var(--glow-magenta) !important;
+        }
+        @keyframes inputShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
         .submit-btn {
             padding: 14px 36px; font-family: 'Space Grotesk', sans-serif;
             font-size: 0.8rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
@@ -432,7 +534,9 @@
         .password-reveal {
             margin: 20px 0; padding: 20px; border-radius: 12px;
             background: rgba(0, 255, 213, 0.05); border: 1px dashed rgba(0, 255, 213, 0.2);
+            cursor: pointer; transition: all 0.3s ease;
         }
+        .password-reveal:active { transform: scale(0.98); }
         .password-reveal .pw-label {
             font-family: 'Syne Mono', monospace; font-size: 0.55rem;
             letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim);
@@ -442,6 +546,11 @@
             font-family: 'Syne Mono', monospace; font-size: 1.3rem;
             color: var(--cyan); letter-spacing: 4px;
             text-shadow: 0 0 20px rgba(0,255,213,0.5);
+        }
+        .password-reveal .pw-copy-hint {
+            font-family: 'Syne Mono', monospace; font-size: 0.5rem;
+            letter-spacing: 2px; color: var(--text-dim); margin-top: 10px;
+            opacity: 0.5;
         }
 
         /* === DANGER SHAKE === */
@@ -465,7 +574,7 @@
             animation: overloadGlow 2.2s ease-in forwards;
         }
         body.overload::after {
-            content: '⚡ OVERLOAD'; position: fixed; top: 50%; left: 50%;
+            content: 'OVERLOAD'; position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%); z-index: 10000;
             font-family: 'Outfit', sans-serif; font-size: clamp(2rem, 8vw, 5rem); font-weight: 900;
             letter-spacing: -0.02em; white-space: nowrap;
@@ -493,6 +602,10 @@
         @keyframes flashOut { from { opacity: 1; } to { opacity: 0; } }
 
         /* === RESPONSIVE === */
+        @media (max-width: 400px) {
+            .numbers-grid { grid-template-columns: repeat(6, 1fr); }
+            .num-cell { font-size: 0.65rem; }
+        }
         @media (min-width: 600px) {
             .cards-grid { grid-template-columns: repeat(2, 1fr); }
         }
@@ -503,14 +616,65 @@
             .answer-bar { position: relative; bottom: auto; }
         }
 
+        /* === PAGE TRANSITION === */
+        .panel-frame.slide-out-left {
+            animation: slideOutLeft 0.3s ease-in forwards;
+        }
+        .panel-frame.slide-in-right {
+            animation: slideInRight 0.3s ease-out forwards;
+        }
+        .panel-frame.slide-out-right {
+            animation: slideOutRight 0.3s ease-in forwards;
+        }
+        .panel-frame.slide-in-left {
+            animation: slideInLeft 0.3s ease-out forwards;
+        }
+        @keyframes slideOutLeft {
+            to { transform: translateX(-30px); opacity: 0; }
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            to { transform: translateX(30px); opacity: 0; }
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         /* === SCROLLBAR === */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 2px; }
         * { scrollbar-width: thin; scrollbar-color: var(--cyan) transparent; }
+
+        /* === COMPLETED SCREEN === */
+        .completed-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; text-align: center; padding: 20px;
+        }
+        .completed-check {
+            width: 60px; height: 60px; border-radius: 50%;
+            border: 2px solid var(--cyan); display: flex; align-items: center; justify-content: center;
+            margin-bottom: 24px; animation: checkPulse 2s ease-in-out infinite;
+        }
+        .completed-check svg { width: 28px; height: 28px; stroke: var(--cyan); }
+        @keyframes checkPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,255,213,0.2); }
+            50% { box-shadow: 0 0 40px rgba(0,255,213,0.5); }
+        }
     </style>
 </head>
 <body>
+    <!-- SPLASH SCREEN -->
+    <div class="splash" id="splash">
+        <div class="splash-logo">ENIGMA</div>
+        <div class="splash-sub">LOADING SYSTEM</div>
+        <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+    </div>
+
     <canvas id="bg-canvas"></canvas>
     <div class="grain"></div>
     <div class="vignette"></div>
@@ -520,47 +684,54 @@
     <div class="hud-corner bl"></div>
     <div class="hud-corner br"></div>
 
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ATTEMPTS -->
+    <div class="attempts-badge" id="attempts-badge">TENTATIVI: <span class="count" id="attempts-count">0</span></div>
+
     <div class="top-bar">
         <div class="top-bar-left">
             <div class="status-dot"></div>
             <span class="status-label">ENIGMA ACTIVE</span>
         </div>
         <div class="top-bar-right">
-            <button class="icon-btn" id="audio-btn" title="Toggle music">🔇</button>
-            <button class="icon-btn" id="fs-btn" title="Fullscreen">⛶</button>
+            <button class="icon-btn" id="audio-btn" aria-label="Attiva o disattiva la musica" title="Toggle music">&#x1F507;</button>
+            <button class="icon-btn" id="fs-btn" aria-label="Schermo intero" title="Fullscreen">&#x26F6;</button>
         </div>
     </div>
 
-    <div class="main">
-        <div class="panel">
+    <main>
+        <section class="panel">
             <div class="riddle-label" id="riddle-label">RIDDLE #1</div>
-            <div class="panel-frame">
+            <div class="panel-frame" id="panel-frame">
                 <div class="page-indicator" id="page-indicator"></div>
                 <div class="text-display" id="text-display"></div>
                 <div class="progress-track" id="progress-track">
                     <div class="progress-bar" id="progress-bar"></div>
                 </div>
-                <button class="nav-btn" id="nav-btn">Next →</button>
+                <button class="nav-btn" id="nav-btn">Next &rarr;</button>
+                <div class="swipe-hint" id="swipe-hint"></div>
             </div>
-        </div>
+        </section>
 
-        <div class="cards-wrapper" id="cards-wrapper" style="display:none;">
+        <section class="cards-wrapper" id="cards-wrapper" style="display:none;">
             <div class="cards-question" id="cards-question" style="text-align:center;margin-bottom:28px;">
-                <div style="font-family:'Syne Mono',monospace;font-size:0.6rem;letter-spacing:5px;text-transform:uppercase;color:var(--cyan);opacity:0.6;margin-bottom:16px;">───  RIDDLE #1  ───</div>
+                <div style="font-family:'Syne Mono',monospace;font-size:0.6rem;letter-spacing:5px;text-transform:uppercase;color:var(--cyan);opacity:0.6;margin-bottom:16px;">---  RIDDLE #1  ---</div>
                 <div style="font-family:'Outfit',sans-serif;font-size:clamp(1.3rem,5vw,2rem);font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.02em;">What is the number I'm thinking of?</div>
             </div>
             <div class="cards-grid" id="cards-grid"></div>
             <div class="answer-bar">
                 <div class="answer-title">Enter the number</div>
                 <div class="answer-row">
-                    <input type="number" inputmode="numeric" pattern="[0-9]*" class="answer-input" id="answer-input" placeholder="?" min="1" max="60">
+                    <input type="number" inputmode="numeric" pattern="[0-9]*" class="answer-input" id="answer-input" placeholder="?" min="1" max="60" aria-label="Inserisci il numero segreto">
                     <button class="submit-btn" id="submit-btn">Verify</button>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
-    <div class="modal-overlay" id="modal">
+    <div class="modal-overlay" id="modal" role="dialog" aria-modal="true">
         <div class="modal-box" id="modal-box">
             <div class="modal-emoji" id="modal-emoji"></div>
             <h2 class="modal-h" id="modal-h"></h2>
@@ -570,19 +741,28 @@
     </div>
 
     <div class="install-prompt" id="install-prompt" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1002;background:rgba(10,10,16,0.95);border:1px solid var(--border);border-radius:16px;padding:16px 20px;max-width:90%;text-align:center;backdrop-filter:blur(20px);">
-        <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:12px;">📱 Add to Home Screen for a bar-free experience</p>
-        <button id="install-btn" style="padding:8px 20px;background:var(--cyan);border:none;border-radius:20px;color:var(--bg);font-family:'Space Grotesk',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;margin-right:8px;">Install</button>
-        <button id="close-prompt" style="padding:8px 16px;background:transparent;border:1px solid var(--text-dim);border-radius:20px;color:var(--text-dim);font-size:0.75rem;cursor:pointer;">Later</button>
+        <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:12px;">Aggiungi alla Home per un'esperienza senza barre</p>
+        <button id="install-btn" style="padding:8px 20px;background:var(--cyan);border:none;border-radius:20px;color:var(--bg);font-family:'Space Grotesk',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;margin-right:8px;">Installa</button>
+        <button id="close-prompt" style="padding:8px 16px;background:transparent;border:1px solid var(--text-dim);border-radius:20px;color:var(--text-dim);font-size:0.75rem;cursor:pointer;">Dopo</button>
     </div>
 
     <script>
-    // ═══════════════════════════════════════
+    // =============================================
+    // SPLASH SCREEN
+    // =============================================
+    const splash = document.getElementById('splash');
+    setTimeout(() => { splash.classList.add('hidden'); }, 2800);
+
+    // =============================================
     // BACKGROUND CANVAS - Particle field
-    // ═══════════════════════════════════════
+    // =============================================
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
     let mouse = { x: -1000, y: -1000 };
+    const isMobile = window.innerWidth < 600;
+    const PARTICLE_COUNT = isMobile ? 40 : 80;
+    const CONNECTION_DIST = isMobile ? 100 : 120;
 
     function resizeCanvas() {
         canvas.width = window.innerWidth;
@@ -592,9 +772,7 @@
     window.addEventListener('resize', resizeCanvas);
 
     class Particle {
-        constructor() {
-            this.reset();
-        }
+        constructor() { this.reset(); }
         reset() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
@@ -628,7 +806,7 @@
         }
     }
 
-    for (let i = 0; i < 80; i++) particles.push(new Particle());
+    for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
 
     function drawConnections() {
         for (let i = 0; i < particles.length; i++) {
@@ -636,11 +814,11 @@
                 const dx = particles[i].x - particles[j].x;
                 const dy = particles[i].y - particles[j].y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 120) {
+                if (dist < CONNECTION_DIST) {
                     ctx.beginPath();
                     ctx.moveTo(particles[i].x, particles[i].y);
                     ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.strokeStyle = `rgba(0, 255, 213, ${0.06 * (1 - dist / 120)})`;
+                    ctx.strokeStyle = `rgba(0, 255, 213, ${0.06 * (1 - dist / CONNECTION_DIST)})`;
                     ctx.lineWidth = 0.5;
                     ctx.stroke();
                 }
@@ -661,30 +839,56 @@
         if (e.touches.length > 0) { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; }
     }, { passive: true });
 
-    // ═══════════════════════════════════════
+    // =============================================
+    // TOAST SYSTEM
+    // =============================================
+    let toastTimer = null;
+    function showToast(message, type) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast ' + type;
+        clearTimeout(toastTimer);
+        requestAnimationFrame(() => {
+            toast.classList.add('visible');
+            toastTimer = setTimeout(() => { toast.classList.remove('visible'); }, 2500);
+        });
+    }
+
+    // =============================================
     // GAME LOGIC
-    // ═══════════════════════════════════════
+    // =============================================
     const PAGES = [
         { text: "WELCOME", isWelcome: true },
         { text: "If you're reading these words, it means you've taken the first step.\n\nThank you for scanning me." },
         { text: "From this very moment, the reality around you changes.\n\nYou're about to enter a role-playing game in the real world." },
-        { text: "Throughout the municipality, 10 riddles are hidden.\n\nNine still await you… but only one is in front of you now." },
+        { text: "Throughout the municipality, 10 riddles are hidden.\n\nNine still await you... but only one is in front of you now." },
         { text: "Each riddle is concealed as a QR code, ready to be discovered.\n\nThe puzzles must be solved in ascending order, one after another." },
         { text: "Every time you pass a challenge, you'll receive a secret password.\n\nOnly that key will unlock the next riddle.\n\nThe higher the number, the greater the challenge." },
-        { text: "If you have the courage, wit and determination to reach the end…\n\n✨ a surprise awaits you ✨" },
+        { text: "If you have the courage, wit and determination to reach the end...\n\nA surprise awaits you." },
         { text: "So tell me:\n\nAre you ready to start the adventure?", isLastIntro: true },
-        { text: "I'm thinking of a secret number, hidden between 1 and 60.\n\nIt's there, invisible… waiting to be discovered.", isGame: true },
-        { text: "In front of you, you see several folders.\n\nSelect them, observe carefully — and I will reveal whether the number you seek is hidden there or not.", isGame: true },
-        { text: "When you have identified all the correct folders…\n\nStop. Breathe.", isGame: true },
+        { text: "I'm thinking of a secret number, hidden between 1 and 60.\n\nIt's there, invisible... waiting to be discovered.", isGame: true },
+        { text: "In front of you, you see several folders.\n\nSelect them, observe carefully \u2014 and I will reveal whether the number you seek is hidden there or not.", isGame: true },
+        { text: "When you have identified all the correct folders...\n\nStop. Breathe.", isGame: true },
         { text: "It's time to use logic, intuition and your wit.\n\nPut together the clues, connect the fragments of truth and tell me, without hesitation:", isGame: true },
         { text: "What is the number I'm thinking of?", isGame: true, showCards: true, isFinal: true }
     ];
 
-    const SECRET = Math.floor(Math.random() * 60) + 1;
-    const PASSWORD = 'ENIGMA2-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    // Session state persistence
+    let SECRET, PASSWORD;
+    const saved = sessionStorage.getItem('enigma1_state');
+    if (saved) {
+        const state = JSON.parse(saved);
+        SECRET = state.secret;
+        PASSWORD = state.password;
+    } else {
+        SECRET = Math.floor(Math.random() * 60) + 1;
+        PASSWORD = 'ENIGMA2-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        sessionStorage.setItem('enigma1_state', JSON.stringify({ secret: SECRET, password: PASSWORD }));
+    }
+
     let page = 0;
     let hasWon = false;
-    let typing = false;
+    let attempts = 0;
 
     function genNumbers(idx) {
         const pw = Math.pow(2, idx), nums = [];
@@ -711,9 +915,13 @@
     const cardsGrid = $('cards-grid');
     const pageIndicator = $('page-indicator');
     const answerInput = $('answer-input');
+    const panelFrame = $('panel-frame');
+    const swipeHint = $('swipe-hint');
+    const attemptsBadge = $('attempts-badge');
+    const attemptsCount = $('attempts-count');
 
     // Build page dots
-    PAGES.forEach((_, i) => {
+    PAGES.forEach(() => {
         const dot = document.createElement('div');
         dot.className = 'page-dot';
         pageIndicator.appendChild(dot);
@@ -728,6 +936,9 @@
         });
     }
 
+    // =============================================
+    // TYPEWRITER EFFECT (fixed char-by-char reveal)
+    // =============================================
     function typeReveal(container, text, isWelcome, isFinal) {
         container.innerHTML = '';
         if (isWelcome) {
@@ -741,19 +952,54 @@
 
         const wrapper = document.createElement('div');
         wrapper.className = 'typewriter' + (isFinal ? ' final-q' : '');
-        wrapper.innerHTML = text.replace(/\n/g, '<br>');
+
+        // Build char spans for animation
+        const lines = text.split('\n');
+        lines.forEach((line, li) => {
+            if (line === '') {
+                const br = document.createElement('span');
+                br.className = 'char break';
+                wrapper.appendChild(br);
+            } else {
+                for (let ci = 0; ci < line.length; ci++) {
+                    const span = document.createElement('span');
+                    if (line[ci] === ' ') {
+                        span.className = 'char space';
+                        span.innerHTML = '&nbsp;';
+                    } else {
+                        span.className = 'char';
+                        span.textContent = line[ci];
+                    }
+                    wrapper.appendChild(span);
+                }
+            }
+            if (li < lines.length - 1 && lines[li] !== '') {
+                const br = document.createElement('br');
+                wrapper.appendChild(br);
+            }
+        });
+
         container.appendChild(wrapper);
-        requestAnimationFrame(() => wrapper.classList.add('visible'));
+        requestAnimationFrame(() => {
+            wrapper.classList.add('visible');
+            // Reveal chars one by one
+            const chars = wrapper.querySelectorAll('.char');
+            chars.forEach((ch, i) => {
+                setTimeout(() => ch.classList.add('revealed'), 25 * i);
+            });
+        });
     }
 
-    function showPage(idx) {
+    // =============================================
+    // PAGE NAVIGATION with slide animation
+    // =============================================
+    let transitioning = false;
+
+    function showPage(idx, direction) {
         const p = PAGES[idx];
 
-        if (idx === 0) {
-            $('audio-btn').style.display = 'flex';
-        } else {
-            $('audio-btn').style.display = 'none';
-        }
+        // Audio button always visible
+        $('audio-btn').style.display = 'flex';
 
         if (p.isGame) {
             riddleLabel.classList.add('visible');
@@ -768,39 +1014,104 @@
             cardsWrapper.style.display = 'block';
             setTimeout(() => cardsWrapper.classList.add('visible'), 200);
             buildCards();
+            attemptsBadge.classList.add('visible');
         } else {
             document.querySelector('.panel').classList.remove('hidden-for-cards');
             cardsWrapper.classList.remove('visible');
             cardsWrapper.style.display = 'none';
+            attemptsBadge.classList.remove('visible');
         }
 
         if (p.isFinal) {
             navBtn.style.display = 'none';
             progressTrack.style.display = 'none';
+            swipeHint.style.display = 'none';
         } else if (p.isLastIntro) {
-            navBtn.textContent = "Let's go →";
+            navBtn.textContent = "Let's go \u2192";
             navBtn.classList.add('start-btn');
             navBtn.style.display = 'inline-block';
             progressTrack.style.display = 'block';
+            swipeHint.textContent = isMobile ? 'SWIPE \u2192' : '';
+            swipeHint.style.display = isMobile ? 'block' : 'none';
         } else {
-            navBtn.textContent = 'Next →';
+            navBtn.textContent = 'Next \u2192';
             navBtn.classList.remove('start-btn');
             navBtn.style.display = 'inline-block';
             progressTrack.style.display = 'block';
+            swipeHint.textContent = isMobile ? 'SWIPE \u2192' : '';
+            swipeHint.style.display = isMobile ? 'block' : 'none';
         }
 
         progressBar.style.width = ((idx + 1) / PAGES.length * 100) + '%';
         updateDots();
     }
 
-    function nextPage() {
-        if (page < PAGES.length - 1) {
-            page++;
-            showPage(page);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    function navigatePage(direction) {
+        if (transitioning) return;
+        const target = page + direction;
+        if (target < 0 || target >= PAGES.length) return;
+
+        transitioning = true;
+        const outClass = direction > 0 ? 'slide-out-left' : 'slide-out-right';
+        const inClass = direction > 0 ? 'slide-in-right' : 'slide-in-left';
+
+        panelFrame.classList.add(outClass);
+        setTimeout(() => {
+            panelFrame.classList.remove(outClass);
+            page = target;
+            showPage(page, direction);
+            panelFrame.classList.add(inClass);
+            setTimeout(() => {
+                panelFrame.classList.remove(inClass);
+                transitioning = false;
+            }, 300);
+        }, 280);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function nextPage() { navigatePage(1); }
+    function prevPage() { navigatePage(-1); }
+
+    // =============================================
+    // SWIPE GESTURES
+    // =============================================
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
+    document.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = Date.now();
+    }, { passive: true });
+
+    document.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        const dt = Date.now() - touchStartTime;
+
+        // Must be a horizontal swipe (not vertical scroll), fast enough, long enough
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 400) {
+            // Don't swipe when cards are showing
+            if (PAGES[page] && PAGES[page].showCards) return;
+
+            if (dx < 0) nextPage();      // swipe left = next
+            else if (dx > 0) prevPage();  // swipe right = prev
+        }
+    }, { passive: true });
+
+    // Prevent double-tap zoom
+    let lastTapTime = 0;
+    document.addEventListener('touchend', e => {
+        const now = Date.now();
+        if (now - lastTapTime < 300) e.preventDefault();
+        lastTapTime = now;
+    }, { passive: false });
+
+    // =============================================
+    // CARDS
+    // =============================================
     function buildCards() {
         cardsGrid.innerHTML = '';
         CARDS.forEach((c, i) => {
@@ -824,6 +1135,9 @@
 
     let selected = new Set();
     function toggleCard(el, id, has) {
+        // Haptic feedback
+        if (navigator.vibrate) navigator.vibrate(30);
+
         const was = el.classList.contains('selected');
         el.classList.add('selecting');
         setTimeout(() => el.classList.remove('selecting'), 500);
@@ -833,7 +1147,7 @@
             setTimeout(() => {
                 el.classList.add('selected');
                 el.classList.add(has ? 'correct' : 'wrong');
-                el.querySelector('.card-badge').textContent = has ? '✓ YES' : '✗ NO';
+                el.querySelector('.card-badge').textContent = has ? '\u2713 YES' : '\u2717 NO';
             }, 250);
             selected.add(id);
         } else {
@@ -845,19 +1159,24 @@
     function checkAnswer() {
         const val = parseInt(answerInput.value);
         if (isNaN(val) || val < 1 || val > 60) {
-            triggerDanger();
-            showModal('error', '⚠️', 'ERROR', '<p>Enter a valid number between 1 and 60.</p>');
+            answerInput.classList.add('shake');
+            setTimeout(() => answerInput.classList.remove('shake'), 500);
+            if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+            showToast('Inserisci un numero tra 1 e 60', 'error');
             return;
         }
+
+        attempts++;
+        attemptsCount.textContent = attempts;
+
         if (val === SECRET) {
             triggerOverload();
         } else {
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
             triggerDanger();
-            showModal('error', '❌', 'WRONG', `
-                <p>The number is incorrect.</p>
-                <p style="margin-top:12px;">Review your choices among the folders and try again.</p>
-                <p style="margin-top:12px;">The number I'm thinking of is present in the folders where I told you it is.</p>
-            `);
+            answerInput.classList.add('shake');
+            setTimeout(() => answerInput.classList.remove('shake'), 500);
+            showToast('Numero errato. Riprova!', 'error');
         }
     }
 
@@ -877,20 +1196,43 @@
             hasWon = true;
             showModal('success', '', 'CORRECT', `
                 <p>The number was <strong>${SECRET}</strong>.</p>
+                <p style="margin-top:8px;font-size:0.8rem;color:var(--text-dim);">Risolto in <strong style="color:var(--cyan);">${attempts}</strong> ${attempts === 1 ? 'tentativo' : 'tentativi'}.</p>
                 <p style="margin-top:12px;">You passed this challenge with cunning.</p>
                 <p style="margin-top:20px;">The trick: the first number in each folder is a power of 2. The secret number appears only in folders whose power-of-2 values sum to the answer.</p>
                 <div style="margin:16px 0;padding:12px;background:rgba(255,255,255,0.02);border-radius:10px;font-family:'Syne Mono',monospace;font-size:0.7rem;line-height:2;color:var(--text-dim);">
-                    Folder 06 → 32 (2⁵)<br>Folder 05 → 16 (2⁴)<br>Folder 04 → 8 (2³)<br>
-                    Folder 03 → 4 (2²)<br>Folder 02 → 2 (2¹)<br>Folder 01 → 1 (2⁰)
+                    Folder 06 \u2192 32 (2\u2075)<br>Folder 05 \u2192 16 (2\u2074)<br>Folder 04 \u2192 8 (2\u00B3)<br>
+                    Folder 03 \u2192 4 (2\u00B2)<br>Folder 02 \u2192 2 (2\u00B9)<br>Folder 01 \u2192 1 (2\u2070)
                 </div>
-                <p><em>Example: 37 → 32 + 4 + 1 → Folders 06, 03 & 01</em></p>
-                <div class="password-reveal">
+                <p><em>Example: 37 \u2192 32 + 4 + 1 \u2192 Folders 06, 03 & 01</em></p>
+                <div class="password-reveal" id="pw-reveal" onclick="copyPassword()">
                     <div class="pw-label">Password for the next challenge</div>
                     <div class="pw-value">${PASSWORD}</div>
+                    <div class="pw-copy-hint">TAP TO COPY</div>
                 </div>
-                <p>Keep it safe. You'll need it.<br><strong>Good luck… you'll need it.</strong></p>
+                <p>Keep it safe. You'll need it.<br><strong>Good luck... you'll need it.</strong></p>
             `);
         }, 2700);
+    }
+
+    // Copy password to clipboard
+    function copyPassword() {
+        navigator.clipboard.writeText(PASSWORD).then(() => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            showToast('Password copiata!', 'success');
+            const hint = document.querySelector('.pw-copy-hint');
+            if (hint) hint.textContent = 'COPIATA!';
+        }).catch(() => {
+            // Fallback for older browsers
+            const ta = document.createElement('textarea');
+            ta.value = PASSWORD;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('Password copiata!', 'success');
+        });
     }
 
     function showModal(type, emoji, title, html) {
@@ -904,12 +1246,16 @@
 
     function closeModal() {
         if (hasWon) {
-            document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#050508;color:var(--cyan);font-family:'Outfit',sans-serif;text-align:center;padding:20px;">
-                <div style="font-size:3rem;margin-bottom:20px;">✓</div>
-                <h1 style="font-size:1.6rem;font-weight:800;color:#00ffd5;margin-bottom:12px;">COMPLETED</h1>
-                <p style="font-size:0.9rem;color:#4a5568;">You can close this page.</p>
-            </div>`;
-            setTimeout(() => window.close(), 1000);
+            sessionStorage.removeItem('enigma1_state');
+            document.body.innerHTML = `
+                <div class="completed-screen" style="background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;">
+                    <div style="width:60px;height:60px;border-radius:50%;border:2px solid #00ffd5;display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 0 30px rgba(0,255,213,0.3);">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ffd5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <h1 style="font-family:'Outfit',sans-serif;font-size:1.6rem;font-weight:800;color:#00ffd5;margin-bottom:12px;">COMPLETED</h1>
+                    <p style="font-family:'Space Grotesk',sans-serif;font-size:0.9rem;color:#4a5568;">Puoi chiudere questa pagina.</p>
+                    <p style="font-family:'Syne Mono',monospace;font-size:0.65rem;color:#4a5568;margin-top:20px;letter-spacing:2px;">ENIGMA #2 TI ASPETTA</p>
+                </div>`;
         } else {
             $('modal').classList.remove('open');
             document.body.style.overflow = '';
@@ -923,16 +1269,9 @@
     $('modal').addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
     answerInput.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); checkAnswer(); } });
 
-    // Prevent double-tap zoom
-    document.addEventListener('touchend', e => {
-        const now = Date.now();
-        if (now - (document.lastTE || 0) < 300) e.preventDefault();
-        document.lastTE = now;
-    }, { passive: false });
-
-    // ═══════════════════════════════════════
+    // =============================================
     // FULLSCREEN
-    // ═══════════════════════════════════════
+    // =============================================
     const fsBtn = $('fs-btn');
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     if (isStandalone) fsBtn.style.display = 'none';
@@ -941,17 +1280,17 @@
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
             const el = document.documentElement;
             (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen).call(el);
-            fsBtn.textContent = '✕';
+            fsBtn.textContent = '\u2715';
         } else {
             (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen).call(document);
-            fsBtn.textContent = '⛶';
+            fsBtn.textContent = '\u26F6';
         }
     });
-    document.addEventListener('fullscreenchange', () => { fsBtn.textContent = document.fullscreenElement ? '✕' : '⛶'; });
+    document.addEventListener('fullscreenchange', () => { fsBtn.textContent = document.fullscreenElement ? '\u2715' : '\u26F6'; });
 
-    // ═══════════════════════════════════════
+    // =============================================
     // PWA
-    // ═══════════════════════════════════════
+    // =============================================
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault(); deferredPrompt = e;
@@ -963,15 +1302,15 @@
     $('close-prompt')?.addEventListener('click', () => { $('install-prompt').style.display = 'none'; });
     if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !isStandalone) {
         setTimeout(() => {
-            $('install-prompt').querySelector('p').innerHTML = '📱 Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>';
+            $('install-prompt').querySelector('p').innerHTML = 'Tap <strong>Condividi</strong> \u2192 <strong>Aggiungi alla Home</strong>';
             $('install-btn').style.display = 'none';
             $('install-prompt').style.display = 'block';
         }, 5000);
     }
 
-    // ═══════════════════════════════════════
-    // AUDIO ENGINE (same synth, cleaner code)
-    // ═══════════════════════════════════════
+    // =============================================
+    // AUDIO ENGINE
+    // =============================================
     const audioBtn = $('audio-btn');
     let playing = false, actx = null, mgain = null, nodes = [], timers = [], beat = 0;
 
@@ -1041,14 +1380,14 @@
     }
 
     audioBtn.addEventListener('click', () => {
-        if (playing) { stopAudio(); audioBtn.textContent = '🔇'; audioBtn.classList.remove('active'); }
-        else { try { startAudio(); audioBtn.textContent = '🔊'; audioBtn.classList.add('active'); } catch (e) {} }
+        if (playing) { stopAudio(); audioBtn.textContent = '\uD83D\uDD07'; audioBtn.classList.remove('active'); }
+        else { try { startAudio(); audioBtn.textContent = '\uD83D\uDD0A'; audioBtn.classList.add('active'); } catch (e) {} }
         playing = !playing;
     });
 
-    // ═══════════════════════════════════════
+    // =============================================
     // INIT
-    // ═══════════════════════════════════════
+    // =============================================
     showPage(0);
     </script>
 </body>
